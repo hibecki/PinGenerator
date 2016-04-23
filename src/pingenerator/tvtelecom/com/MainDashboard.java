@@ -19,6 +19,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
+import org.json.simple.JSONObject;
+
 @WebServlet("/MainDashboard")
 public class MainDashboard extends HttpServlet {
 	private static final long serialVersionUID = 1L;
@@ -27,38 +29,39 @@ public class MainDashboard extends HttpServlet {
         super();
     }
 
+    @SuppressWarnings("unchecked")
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Logger LOG = Logger.getLogger(MainDashboard.class.getName());
         request.setCharacterEncoding(Utils.CharacterEncoding);
 
 		Connection con = null;
 		Statement st1 = null;
-		String sql1 = "select count(*) cA from pin where status = 'A' and serial is null";
-		String sql2 = "select count(*) cM from pin where status = 'M'";
+		String sql1 = "select count(*) cA, digit from pin where status = 'A' and serial is null group by digit";
 		
 		
 		ResultSet rs1 = null;
 
 		
 		String result="failed";
-		long cA = 0;
-		long cM = 0;
+        //JSONObject json;
+        //JSONArray jsonA = new JSONArray();
+		JSONObject json = new JSONObject();
 		try {
 			Context ctx = new InitialContext();
 			DataSource ds = (DataSource)ctx.lookup("java:comp/env/jdbc/PinGen");
 			con = ds.getConnection();
 			st1 = con.createStatement();
 			rs1 = st1.executeQuery(sql1);
-			if (rs1.next()) {
-				cA = rs1.getLong("cA");
+			while (rs1.next()) {
+                //json = new JSONObject();
+                //json.put("digit",rs1.getInt("digit"));
+                //json.put("count",rs1.getLong("cA"));
+                //jsonA.add(json);
+                json.put("count"+rs1.getInt("digit"),rs1.getLong("cA"));
 			}
 			rs1.close();
-			rs1 = st1.executeQuery(sql2);
-			if (rs1.next()) {
-				cM = rs1.getLong("cM");
-			}
 			result = "succeed";
-LOG.log(Level.INFO,"MainDashboard countA: {0} countB: {1}",new Object[]{cA,cM});
+LOG.log(Level.INFO,"MainDashboard result: {0}",new Object[]{result});
 			
 		} catch(NamingException | SQLException ex) {
 			LOG.log(Level.SEVERE, ex.getMessage(), ex);
@@ -71,11 +74,17 @@ LOG.log(Level.INFO,"MainDashboard countA: {0} countB: {1}",new Object[]{cA,cM});
             	LOG.log(Level.WARNING, ex.getMessage(), ex);
             }
 		}
-
+		//JSONObject res = new JSONObject();
+		//res.put("result", result);
+		//res.put("countlist", jsonA);
+//LOG.log(Level.INFO,"{0}-{1}",new Object[]{"JobList","jsonZ: "+res.toJSONString()});
+		json.put("result",result);
+LOG.log(Level.INFO,"{0}-{1}",new Object[]{"json",json.toJSONString()});
 		response.setContentType("application/json");
 		response.setCharacterEncoding(Utils.CharacterEncoding);
 		PrintWriter out = response.getWriter();
-		out.print("{\"result\":\""+result+"\",\"cA\":"+cA+",\"cM\":"+cM+"}");
+		//res.writeJSONString(out);
+		json.writeJSONString(out);
 		out.flush();
 	}
 

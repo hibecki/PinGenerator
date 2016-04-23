@@ -173,6 +173,14 @@ function addSep(nStr) {
     return x1 + x2;
 }
 
+function updateDashboardContent(digit,countDigit) {
+	var content1 = '<div class="ink-alert basic success"><h2><i class="fa fa-credit-card"></i>&nbsp;&nbsp;&nbsp;XX Digit</h2><h4>countXX</h4><p>Download here</p></div>';
+	var content0 = '<div class="ink-alert basic info"><h2><i class="fa fa-credit-card"></i>&nbsp;&nbsp;&nbsp;XX Digit</h2><h4>0</h4><div>&nbsp;</div></div>';
+	var cDigit = "c".concat(digit);
+	if (count) {InkElement.setHTML(Ink.i(cDigit),content1.replace("countXX",countDigit).replace("XX",digit));
+	} else {InkElement.setHTML(Ink.i(cDigit),content0.replace("XX",digit));}
+}
+
 function updateDashboard() {
 	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Carousel_1','Ink.UI.ProgressBar_1'], function(Ajax,FormSerialize,InkElement,Carousel,ProgressBar) {
 	    var uri = window.url_home + '/MainDashboard';
@@ -180,20 +188,27 @@ function updateDashboard() {
 	        method: 'GET',
 	        onSuccess: function(obj) {
 	            if(obj && obj.responseJSON) {
-	            	var result = obj.responseJSON['result'];var cA = obj.responseJSON['cA'];var cM = obj.responseJSON['cM'];
-Ink.log("result: " + result + " cA: " + cA + " cM: " + cM);
-					if(result==="succeed"){
-						InkElement.setHTML(Ink.i('cA'),cA);InkElement.setHTML(Ink.i('cM'),cM);
+	            	var json = obj.responseJSON;
+					if(json.result==="succeed"){
+						updateDashboardContent("15",json.count15);
+
+						if (json.count14) {InkElement.setHTML(Ink.i('c14'),content1.replace("countXX",json.count14).replace("XX","14"));
+						} else {InkElement.setHTML(Ink.i('c14'),content0.replace("XX","14"));}
+						if (json.count13) {InkElement.setHTML(Ink.i('c13'),content1.replace("countXX",json.count13).replace("XX","13"));
+						} else {InkElement.setHTML(Ink.i('c13'),content0.replace("XX","13"));}
 					}
 	            }
 	        }, 
 	        onFailure: function() {result="failed on network!"
-	Ink.log("result: " + result);
+Ink.log("result: " + result);
 	        }
 	    });
-		if (InkElement.isVisible(Ink.i('cA'))) {setTimeout(function(){updateDashboard();},10000);}
+		//if (InkElement.isVisible(Ink.i('cA'))) {setTimeout(function(){updateDashboard();},10000);}
+	    setTimeout(function(){updateDashboard();},10000);
 	});
 }
+
+
 
 function loginButtonLoginClick() {
 	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Carousel_1','Ink.UI.FormValidator_1'], function(Ajax,FormSerialize,InkElement,Carousel,FormValidator) {
@@ -296,7 +311,7 @@ Ink.log("result: " + result);Ink.log("jobId: " + jobId);Ink.log("count: " + c);
 							setTimeout(function(){pinGenBatchUpdateProgress(probar,jobId,pinAmount);},3000);
 						} else {probar.setValue(100);
 							InkElement.setHTML(Ink.i('pinGenBatchProgressBarCaption'),'<div style="color:white"><i class="fa fa-cog"></i>&nbsp;&nbsp;Succeed</div>');
-							InkElement.setHTML(Ink.i('pinGenBatchAction'),'Export as CSV file: click <a href="'+window.url_home + '/PinExportCSV?jobId='+jobId+'">here</a>');
+							InkElement.setHTML(Ink.i('pinGenBatchAction'),'Download CSV file: click <a href="'+window.url_home + '/PinExportCSV?jobId='+jobId+'">here</a>');
 						}
 					} else {
 Ink.log("result: " + result);
