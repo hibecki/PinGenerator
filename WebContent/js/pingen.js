@@ -312,7 +312,7 @@ Ink.log("result: " + result);
 
 function pinGenSpecButtonPlusClick(rowMore) {
 	Ink.requireModules(['Ink.Dom.Element_1'], function(InkElement) {
-		var pinCount = Ink.i('pinCount').value;
+		var pinCount = Number(Ink.i('pinCount').value);
 		pinCountNew = pinCount + rowMore;
 		for (var i = pinCount+1; i <= pinCountNew; i++) {
 			var pinInputHtml = '<div class="control-group column-group"><div class="control">';
