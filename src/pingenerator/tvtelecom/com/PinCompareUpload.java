@@ -47,9 +47,9 @@ public class PinCompareUpload extends HttpServlet {
         String fileINName = getSubmittedFileName(fileINPart);
         InputStream fileIN = fileINPart.getInputStream();
         
-        Part filePinGenPart = request.getPart("filePinGenHidden");
-        String filePinGenName = getSubmittedFileName(filePinGenPart);
-        InputStream filePinGen = filePinGenPart.getInputStream();
+        //Part filePinGenPart = request.getPart("filePinGenHidden");
+        //String filePinGenName = getSubmittedFileName(filePinGenPart);
+        //InputStream filePinGen = filePinGenPart.getInputStream();
         
 		HttpSession session = request.getSession(false);
 		String userId = ((Integer)session.getAttribute("userId")).toString();
@@ -62,10 +62,10 @@ public class PinCompareUpload extends HttpServlet {
 LOG.log(Level.INFO,"PinCompareUpload uploadFolder:{0}",new Object[]{uploadFolder});
 
 		File file1 = new File(uploadFolder + fileINName);
-		File file2 = new File(uploadFolder + filePinGenName);
+		//File file2 = new File(uploadFolder + filePinGenName);
 
 		Files.copy(fileIN, file1.toPath());
-		Files.copy(filePinGen, file2.toPath());
+		//Files.copy(filePinGen, file2.toPath());
 		
 		
 		

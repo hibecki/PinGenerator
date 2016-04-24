@@ -185,7 +185,7 @@ function updateDashboardContent(digit,countDigit) {
 }
 
 function updateDashboard() {
-	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Carousel_1','Ink.UI.ProgressBar_1'], function(Ajax,FormSerialize,InkElement,Carousel,ProgressBar) {
+	Ink.requireModules(['Ink.Net.Ajax_1','Ink.Dom.Element_1'], function(Ajax,InkElement) {
 	    var uri = window.url_home + '/MainDashboard';
 	    new Ajax(uri, {
 	        method: 'GET',
@@ -205,8 +205,7 @@ function updateDashboard() {
 Ink.log("result: " + result);
 	        }
 	    });
-		//if (InkElement.isVisible(Ink.i('cA'))) {setTimeout(function(){updateDashboard();},10000);}
-	    setTimeout(function(){updateDashboard();},10000);
+		if (InkElement.isVisible(Ink.i('c15'))) {setTimeout(function(){updateDashboard();},10000);}
 	});
 }
 
@@ -501,16 +500,16 @@ function comparePinInputBrowseFilePinGenChange() {
 }
 
 function comparePinButtonSubmitClick() {
-	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Modal_1','Ink.UI.FormValidator_1'], function(Ajax,FormSerialize,InkElement,Modal,FormValidator) {
+	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Modal_1','Ink.UI.FormValidator_1','Ink.UI.Carousel_1','Ink.UI.ProgressBar_1'], function(Ajax,FormSerialize,InkElement,Modal,FormValidator,Carousel,ProgressBar) {
 	    //var formComparePin = Ink.i('formComparePin');
 	    //formComparePin.submit();
 		var fileIN = Ink.i('fileINHidden');
-	    var filePinGen = Ink.i('filePinGenHidden');
+	    //var filePinGen = Ink.i('filePinGenHidden');
 	    
 	    
 	    var data = new FormData();
 	    data.append('fileINHidden', fileIN.files[0]);
-	    data.append('filePinGenHidden', filePinGen.files[0]);
+	    //data.append('filePinGenHidden', filePinGen.files[0]);
 
 	    var request = new XMLHttpRequest();
 	    request.onreadystatechange = function(){
@@ -531,10 +530,42 @@ function comparePinButtonSubmitClick() {
 	        _progress.style.width = Math.ceil(e.loaded/e.total) * 100 + '%';
 	    }, false);
 
-	    request.open('POST', 'PinCompareUpload');
+	    var crs = new Carousel('#pinCompareCarousel');crs.nextPage();
+	    
+	    request.open('POST', window.url_home + '/PinCompareUpload');
 	    request.send(data);
 	    
 	});
+	
+	/**
+	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Carousel_1','Ink.UI.ProgressBar_1'], function(Ajax,FormSerialize,InkElement,Carousel,ProgressBar) {
+	    var form = Ink.i('formPinGenBatch');
+	    var formData = FormSerialize.serialize(form);
+	    var pinAmount = formData.pinAmount;
+	    Ink.i('pinDigit').disabled = true;Ink.i('pinAmount').disabled = true;
+	    Ink.i('buttonGenerate').disabled = true;Ink.i('buttonCancel').disabled = true;
+	    var uri = window.url_home + '/PinGenBatch';
+	    new Ajax(uri, {
+	        method: 'POST',
+	        postBody: formData,
+	        onSuccess: function(obj) {
+	            if(obj && obj.responseJSON) {
+	            	var result = obj.responseJSON['result'];var jobId = obj.responseJSON['jobId'];
+	Ink.log("result: " + result);Ink.log("jobId: " + jobId);
+					if(result==="succeed"){
+						var crs = new Carousel('#pinGenBatchCarousel');crs.nextPage();
+						InkElement.setHTML(Ink.i('pinGenBatchJobId'),'Job ID: <b style="color:red">' + jobId + '</b>');
+						var probar = new ProgressBar('#pinGenBatchProgressBar');
+						setTimeout(function(){pinGenBatchUpdateProgress(probar,jobId,pinAmount);},2000);
+					}
+	            }
+	        }, 
+	        onFailure: function() {result="failed on network!"
+	Ink.log("result: " + result);
+	        }
+	    });
+	});
+	**/
 }
 
 function loadPinButtonBrowseFileINClick() {

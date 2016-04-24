@@ -1,5 +1,7 @@
 <h2>Compare PIN</h2>
-<div class="column-group">
+<div id="pinCompareCarousel" class="ink-carousel">
+    <ul class="stage column-group">
+        <li class="slide all-100">
 
 <form id="formComparePin" class="ink-form" style="width:50em;" enctype="multipart/form-data">
 <div class="control-group column-group">
@@ -9,8 +11,9 @@
 <input id="buttonBrowseFileIN" type="button" value="Browse" class="ink-button green" onclick="comparePinButtonBrowseFileINClick();">
 </div>
 <div id="pinpinSearchSpin" class="align-right" style="font-size:1.6em;margin-top:-.3em;margin-left:.8em"></div>
-</div><input id="fileINHidden" type="file" style="visibility:hidden" onchange="comparePinInputBrowseFileINChange()"/>
+</div><input id="fileINHidden" type="file" style="visibility:hidden" onchange="comparePinInputBrowseFileINChange()" accept=".csv"/>
 
+<!-- 
 <div class="control-group column-group">
 <label for="filePinGen" style="margin-right:2em;">File PinGen:&nbsp;&nbsp;</label>
 <div class="control append-button">
@@ -19,27 +22,34 @@
 </div>
 <div id="pinpinSearchSpin" class="align-right" style="font-size:1.6em;margin-top:-.3em;margin-left:.8em"></div>
 </div><input id="filePinGenHidden" type="file" style="visibility:hidden" onchange="comparePinInputBrowseFilePinGenChange()"/>
+ -->
+
 <br/>
 	<input id="buttonSubmit" type="button" value="Submit" class="ink-button green" onclick="comparePinButtonSubmitClick();">
 	<input id="buttonCancel" type="button" value="Cancel" class="ink-button red" onclick="goHome()">
 </form>
-
+        </li>
+        <li class="slide all-100">
+        	<div id="pinGenBatchJobId"></div><br/>
+			<div id="pinGenBatchAction">Generating..</div> 
+			<br/><br/>
+			<div id="pinGenBatchProgressBar" class="ink-progress-bar" data-start-value="0">
+    			<span id="pinGenBatchProgressBarCaption" class="caption"><i class="fa fa-cog fa-spin"></i>&nbsp;&nbsp;Generating...</span><div class="bar green"></div>
+			</div>
+			
+			<!-- 
+			<br/>You can close this page to continue your work<br/>
+			and find your job progress on <a onclick="menuJobList();">Job List</a> later
+			<br/><br/>
+			-->
+			
+			<div class="push-right"><button class="ink-button" onclick="goHome()">&nbsp;&nbsp;&nbsp;Close&nbsp;&nbsp;&nbsp;</button></div><br/>
+			&nbsp;<br/>
+        </li>
+    </ul>
+        
+        
+        
+        
 </div>
 
-<div class="ink-shade fade">
-    <div id="formPinGenSpecConfirm" class="ink-modal fade" data-trigger="#formPinGenBatchConfirmTrigger" data-width="500px" data-height="400px" role="dialog" aria-hidden="true" aria-labelled-by="modal-title">
-        <div class="modal-header">
-            <!-- <button class="modal-close ink-dismiss"></button>  -->
-            <h2 id="modal-title">Generate PIN / Specific</h2>
-        </div>
-        <div class="modal-body" id="modalContent">
-            <h3>Please confirm</h3>
-            <br/>
-            Do you really want to add pins?
-        </div>
-        <div class="modal-footer">
-        	<div class="push-left"><button class="ink-button ink-dismiss green" onclick="pinGenSpecButtonConfirmClick()">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Yes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</button></div>
-            <div class="push-right"><button class="ink-button ink-dismiss red">&nbsp;&nbsp;&nbsp;Cancel&nbsp;&nbsp;&nbsp;</button></div>
-        </div>
-    </div>
-</div>
