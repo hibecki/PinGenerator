@@ -178,7 +178,7 @@ function updateDashboardContent(digit,countDigit) {
 		var content1 = '<div class="ink-alert basic success"><h2><i class="fa fa-credit-card"></i>&nbsp;&nbsp;&nbsp;XX Digit</h2><h4>countXX</h4><p>Download <a href="'+window.url_home + '/PinDownloadCSV?digit='+digit+'">here</a></p></div>';
 		var content0 = '<div class="ink-alert basic info"><h2><i class="fa fa-credit-card"></i>&nbsp;&nbsp;&nbsp;XX Digit</h2><h4 style="color:white;">No PIN in stock</h4><div>&nbsp;</div></div>';
 		var cDigit = "c".concat(digit);
-		if (countDigit) {InkElement.setHTML(Ink.i(cDigit),content1.replace("countXX",countDigit).replace("XX",digit));
+		if (countDigit && InkElement.isVisible(Ink.i('c15'))) {InkElement.setHTML(Ink.i(cDigit),content1.replace("countXX",countDigit).replace("XX",digit));
 		} else {InkElement.setHTML(Ink.i(cDigit),content0.replace("XX",digit));}	
 	});
 
