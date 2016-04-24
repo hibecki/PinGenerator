@@ -174,11 +174,14 @@ function addSep(nStr) {
 }
 
 function updateDashboardContent(digit,countDigit) {
-	var content1 = '<div class="ink-alert basic success"><h2><i class="fa fa-credit-card"></i>&nbsp;&nbsp;&nbsp;XX Digit</h2><h4>countXX</h4><p>Download here</p></div>';
-	var content0 = '<div class="ink-alert basic info"><h2><i class="fa fa-credit-card"></i>&nbsp;&nbsp;&nbsp;XX Digit</h2><h4>0</h4><div>&nbsp;</div></div>';
-	var cDigit = "c".concat(digit);
-	if (count) {InkElement.setHTML(Ink.i(cDigit),content1.replace("countXX",countDigit).replace("XX",digit));
-	} else {InkElement.setHTML(Ink.i(cDigit),content0.replace("XX",digit));}
+	Ink.requireModules(['Ink.Dom.Element_1'], function(InkElement) {
+		var content1 = '<div class="ink-alert basic success"><h2><i class="fa fa-credit-card"></i>&nbsp;&nbsp;&nbsp;XX Digit</h2><h4>countXX</h4><p>Download <a href="'+window.url_home + '/PinDownloadCSV?digit='+digit+'">here</a></p></div>';
+		var content0 = '<div class="ink-alert basic info"><h2><i class="fa fa-credit-card"></i>&nbsp;&nbsp;&nbsp;XX Digit</h2><h4 style="color:white;">No PIN in stock</h4><div>&nbsp;</div></div>';
+		var cDigit = "c".concat(digit);
+		if (countDigit) {InkElement.setHTML(Ink.i(cDigit),content1.replace("countXX",countDigit).replace("XX",digit));
+		} else {InkElement.setHTML(Ink.i(cDigit),content0.replace("XX",digit));}	
+	});
+
 }
 
 function updateDashboard() {
@@ -190,12 +193,11 @@ function updateDashboard() {
 	            if(obj && obj.responseJSON) {
 	            	var json = obj.responseJSON;
 					if(json.result==="succeed"){
-						updateDashboardContent("15",json.count15);
-
-						if (json.count14) {InkElement.setHTML(Ink.i('c14'),content1.replace("countXX",json.count14).replace("XX","14"));
-						} else {InkElement.setHTML(Ink.i('c14'),content0.replace("XX","14"));}
-						if (json.count13) {InkElement.setHTML(Ink.i('c13'),content1.replace("countXX",json.count13).replace("XX","13"));
-						} else {InkElement.setHTML(Ink.i('c13'),content0.replace("XX","13"));}
+						updateDashboardContent("15",json.count15);updateDashboardContent("14",json.count14);updateDashboardContent("13",json.count13);
+						updateDashboardContent("12",json.count12);updateDashboardContent("11",json.count11);updateDashboardContent("10",json.count10);
+						updateDashboardContent("9",json.count9);updateDashboardContent("8",json.count8);updateDashboardContent("7",json.count7);
+						updateDashboardContent("6",json.count6);updateDashboardContent("5",json.count5);updateDashboardContent("4",json.count4);
+						updateDashboardContent("3",json.count3);updateDashboardContent("2",json.count2);updateDashboardContent("1",json.count1);
 					}
 	            }
 	        }, 
