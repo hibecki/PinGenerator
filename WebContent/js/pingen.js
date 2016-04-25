@@ -498,12 +498,13 @@ function comparePinInputBrowseFilePinGenChange() {
 }
 
 function comparePinButtonSubmitClick() {
-	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Modal_1','Ink.UI.FormValidator_1','Ink.UI.Carousel_1','Ink.UI.ProgressBar_1'], function(Ajax,FormSerialize,InkElement,Modal,FormValidator,Carousel,ProgressBar) {
+	Ink.requireModules(['Ink.Dom.Element_1','Ink.UI.Carousel_1','Ink.UI.ProgressBar_1'], function(InkElement,Carousel,ProgressBar) {
 	    //var formComparePin = Ink.i('formComparePin');
 	    //formComparePin.submit();
 		var fileIN = Ink.i('fileINHidden');
 	    //var filePinGen = Ink.i('filePinGenHidden');
 	    
+		//var fileIN = document.getElementById("fileINHidden");
 	    
 	    var data = new FormData();
 	    data.append('fileINHidden', fileIN.files[0]);
@@ -516,19 +517,20 @@ function comparePinButtonSubmitClick() {
 	        if(request.readyState == 4){
 	            try {
 	                var resp = JSON.parse(request.response);
+	                comparePinUpdateProgress(resp.jobid);
 	            } catch (e){
 	                var resp = {
-	                    status: 'error',
-	                    data: 'Unknown error occurred: [' + request.responseText + ']'
+	                    result: 'failed on network!',
+	                    fileName: 'Unknown error occurred: [' + request.responseText + ']'
 	                };
 	            }
-	            console.log(resp.status + ': ' + resp.data);
+	            console.log(resp.result + ': ' + resp.fileName);
 	        }
 	    };
 
 	    request.upload.addEventListener('progress', function(e){
-	    	probar.setValue(Math.ceil(e.loaded/e.total) * 100);
-	    	if (e.loaded == e.total) {comparePinProgress();}
+	    	probar.setValue(Math.ceil(e.loaded/e.total) * 20);
+	    	//if (e.loaded == e.total) {comparePinProgress(fileIN.files[0]);}
 	    }, false);
 
 	    var crs = new Carousel('#pinCompareCarousel');crs.nextPage();
@@ -537,15 +539,17 @@ function comparePinButtonSubmitClick() {
 	    request.send(data);
 	    
 	});
-	
-	/**
+}
+function comparePinUpdateProgress(jobid) {
+	alert(jobid);
+
 	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Carousel_1','Ink.UI.ProgressBar_1'], function(Ajax,FormSerialize,InkElement,Carousel,ProgressBar) {
 	    var form = Ink.i('formPinGenBatch');
 	    var formData = FormSerialize.serialize(form);
 	    var pinAmount = formData.pinAmount;
 	    Ink.i('pinDigit').disabled = true;Ink.i('pinAmount').disabled = true;
 	    Ink.i('buttonGenerate').disabled = true;Ink.i('buttonCancel').disabled = true;
-	    var uri = window.url_home + '/PinGenBatch';
+	    var uri = window.url_home + '/PinCompareCount?jobid=' + jobid;
 	    new Ajax(uri, {
 	        method: 'POST',
 	        postBody: formData,
@@ -555,9 +559,10 @@ function comparePinButtonSubmitClick() {
 	Ink.log("result: " + result);Ink.log("jobId: " + jobId);
 					if(result==="succeed"){
 						var crs = new Carousel('#pinGenBatchCarousel');crs.nextPage();
-						InkElement.setHTML(Ink.i('pinGenBatchJobId'),'Job ID: <b style="color:red">' + jobId + '</b>');
-						var probar = new ProgressBar('#pinGenBatchProgressBar');
-						setTimeout(function(){pinGenBatchUpdateProgress(probar,jobId,pinAmount);},2000);
+						InkElement.setHTML(Ink.i('pinCompareAction'),'Comparing..');
+						var probar = new ProgressBar('#pinCompareProgressBar');
+						//setTimeout(function(){comparePinUpdateProgress(probar,jobId,pinAmount);},2000);
+						setTimeout(function(){comparePinUpdateProgress(probar,jobId,pinAmount);},2000);
 					}
 	            }
 	        }, 
@@ -566,10 +571,9 @@ function comparePinButtonSubmitClick() {
 	        }
 	    });
 	});
-	**/
 }
-function comparePinProgress() {
-	alert('comparePinProgress');
+function comparePinUpdateProgress(probar,jobId,pinAmount) {
+	
 }
 
 function loadPinButtonBrowseFileINClick() {

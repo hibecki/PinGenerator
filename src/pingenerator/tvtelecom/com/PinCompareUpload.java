@@ -57,13 +57,12 @@ public class PinCompareUpload extends HttpServlet {
 		SimpleDateFormat dFormat = new SimpleDateFormat("yyMMddhhmmss");
 		String jobId = dFormat.format(new Date());
 		
-		String uploadFolder = getServletContext().getInitParameter("uploadFolder"); 
-		
-LOG.log(Level.INFO,"PinCompareUpload uploadFolder:{0}",new Object[]{uploadFolder});
+		String uploadFolder = getServletContext().getInitParameter("uploadFolder");
 
-		File file1 = new File(uploadFolder + '_' + dFormat.format(new Date()) + '_' + fileINName);
+		String fileNameUploaded = '_' + dFormat.format(new Date()) + '_' + fileINName;
+		File file1 = new File(uploadFolder + fileNameUploaded);
 		//File file2 = new File(uploadFolder + filePinGenName);
-
+LOG.log(Level.INFO,"PinCompareUpload uploadFolder:{0} uploadFileName:{1}",new Object[]{uploadFolder,fileNameUploaded});
 		Files.copy(fileIN, file1.toPath());
 		//Files.copy(filePinGen, file2.toPath());
 		
@@ -121,7 +120,7 @@ LOG.log(Level.INFO,"{0}-{1}",new Object[]{"call PinCompareX",urlcon.getDate()});
 		response.setContentType("application/json");
 		response.setCharacterEncoding(Utils.CharacterEncoding);
 		PrintWriter out = response.getWriter();
-		out.print("{\"result\":\""+result+"\",\"jobId\":"+jobId+"}");
+		out.print("{\"result\":\""+result+"\",\"fileName\":\""+fileNameUploaded+"\",\"jobId\":"+jobId+"}");
 		out.flush();
 	}
 
