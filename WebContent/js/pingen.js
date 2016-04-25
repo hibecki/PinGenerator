@@ -173,43 +173,40 @@ function addSep(nStr) {
     return x1 + x2;
 }
 
-function updateDashboardContent(digit,countDigit) {
-	Ink.requireModules(['Ink.Dom.Element_1'], function(InkElement) {
-		var content1 = '<div class="ink-alert basic success"><h2><i class="fa fa-credit-card"></i>&nbsp;&nbsp;&nbsp;XX Digit</h2><h4>countXX</h4><p>Download <a href="'+window.url_home + '/PinDownloadCSV?digit='+digit+'">here</a></p></div>';
-		var content0 = '<div class="ink-alert basic info"><h2><i class="fa fa-credit-card"></i>&nbsp;&nbsp;&nbsp;XX Digit</h2><h4 style="color:white;">No PIN in stock</h4><div>&nbsp;</div></div>';
-		var cDigit = "c".concat(digit);
-		if (countDigit && InkElement.isVisible(Ink.i('c15'))) {InkElement.setHTML(Ink.i(cDigit),content1.replace("countXX",countDigit).replace("XX",digit));
-		} else {InkElement.setHTML(Ink.i(cDigit),content0.replace("XX",digit));}	
-	});
-
-}
-
 function updateDashboard() {
-	Ink.requireModules(['Ink.Net.Ajax_1','Ink.Dom.Element_1'], function(Ajax,InkElement) {
-	    var uri = window.url_home + '/MainDashboard';
-	    new Ajax(uri, {
-	        method: 'GET',
-	        onSuccess: function(obj) {
-	            if(obj && obj.responseJSON) {
-	            	var json = obj.responseJSON;
-					if(json.result==="succeed"){
-						updateDashboardContent("15",json.count15);updateDashboardContent("14",json.count14);updateDashboardContent("13",json.count13);
-						updateDashboardContent("12",json.count12);updateDashboardContent("11",json.count11);updateDashboardContent("10",json.count10);
-						updateDashboardContent("9",json.count9);updateDashboardContent("8",json.count8);updateDashboardContent("7",json.count7);
-						updateDashboardContent("6",json.count6);updateDashboardContent("5",json.count5);updateDashboardContent("4",json.count4);
-						updateDashboardContent("3",json.count3);updateDashboardContent("2",json.count2);updateDashboardContent("1",json.count1);
-					}
-	            }
-	        }, 
-	        onFailure: function() {result="failed on network!"
-Ink.log("result: " + result);
-	        }
-	    });
-		if (InkElement.isVisible(Ink.i('c15'))) {setTimeout(function(){updateDashboard();},10000);}
-	});
+	if (document.getElementById("c15")) {
+		var xhttp = new XMLHttpRequest();
+		xhttp.onreadystatechange = function() {
+			if (xhttp.readyState == 4 && xhttp.status == 200) {
+				var json = JSON.parse(xhttp.responseText);
+				if(json.result==="succeed"){
+					updateDashboardContent("15",json.count15);updateDashboardContent("14",json.count14);updateDashboardContent("13",json.count13);
+					updateDashboardContent("12",json.count12);updateDashboardContent("11",json.count11);updateDashboardContent("10",json.count10);
+					updateDashboardContent("9",json.count9);updateDashboardContent("8",json.count8);updateDashboardContent("7",json.count7);
+					updateDashboardContent("6",json.count6);updateDashboardContent("5",json.count5);updateDashboardContent("4",json.count4);
+					updateDashboardContent("3",json.count3);updateDashboardContent("2",json.count2);updateDashboardContent("1",json.count1);
+				}
+	
+			} else {
+				result="failed on network!";
+			}
+		};
+		var uri = window.url_home + '/MainDashboard';
+	  	xhttp.open("GET", uri, true);
+	  	xhttp.send();
+	  	setTimeout(function(){updateDashboard();},8000);
+  	}
 }
-
-
+function updateDashboardContent(digit,countDigit) {
+	var content1 = '<div class="ink-alert basic success"><h2><i class="fa fa-credit-card"></i>&nbsp;&nbsp;&nbsp;XX Digit</h2><h4>countXX</h4><p>Download <a href="'+window.url_home + '/PinDownloadCSV?digit='+digit+'">here</a></p></div>';
+	var content0 = '<div class="ink-alert basic info"><h2><i class="fa fa-credit-card"></i>&nbsp;&nbsp;&nbsp;XX Digit</h2><h4 style="color:white;">No PIN in stock</h4><div>&nbsp;</div></div>';
+	var cDigit = "c".concat(digit);
+	if (countDigit) {
+		if (document.getElementById(cDigit)) document.getElementById(cDigit).innerHTML = content1.replace("countXX",countDigit).replace("XX",digit);
+	} else {
+		if (document.getElementById(cDigit)) document.getElementById(cDigit).innerHTML = content0.replace("XX",digit);
+	}
+}
 
 function loginButtonLoginClick() {
 	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Carousel_1','Ink.UI.FormValidator_1'], function(Ajax,FormSerialize,InkElement,Carousel,FormValidator) {
@@ -234,6 +231,7 @@ Ink.log("result: " + result);Ink.log("name: " + name);
     						if(name.length<20){var l = name.length/2;l = 10 - l;for(var i = 1;i <= l; i++){pre += '&nbsp;';}}
     						name = pre+name+pre;
     						InkElement.appendHTML(Ink.i('bar-top-nav'),'<ul class="menu horizontal black push-right"><li><a>'+name+'</a><ul class="submenu" style="background:#1b99ee;"><li><a onclick="" style="color:white;">Change password</a></li><li><a onclick="menuSignout()" style="color:white;">Sign out</a></li></ul></li></ul>');
+    						setTimeout(function(){updateDashboard();},5000);
     					} else {
     					    if (typeof crsLogin == "undefined") {crsLogin = new Carousel('#loginCarousel');}
     						crsLogin.nextPage();	
@@ -511,6 +509,8 @@ function comparePinButtonSubmitClick() {
 	    data.append('fileINHidden', fileIN.files[0]);
 	    //data.append('filePinGenHidden', filePinGen.files[0]);
 
+		var probar = new ProgressBar('#pinCompareProgressBar');
+		
 	    var request = new XMLHttpRequest();
 	    request.onreadystatechange = function(){
 	        if(request.readyState == 4){
@@ -527,7 +527,8 @@ function comparePinButtonSubmitClick() {
 	    };
 
 	    request.upload.addEventListener('progress', function(e){
-	        _progress.style.width = Math.ceil(e.loaded/e.total) * 100 + '%';
+	    	probar.setValue(Math.ceil(e.loaded/e.total) * 100);
+	    	if (e.loaded == e.total) {comparePinProgress();}
 	    }, false);
 
 	    var crs = new Carousel('#pinCompareCarousel');crs.nextPage();
@@ -566,6 +567,9 @@ function comparePinButtonSubmitClick() {
 	    });
 	});
 	**/
+}
+function comparePinProgress() {
+	alert('comparePinProgress');
 }
 
 function loadPinButtonBrowseFileINClick() {

@@ -61,7 +61,7 @@ public class PinCompareUpload extends HttpServlet {
 		
 LOG.log(Level.INFO,"PinCompareUpload uploadFolder:{0}",new Object[]{uploadFolder});
 
-		File file1 = new File(uploadFolder + fileINName);
+		File file1 = new File(uploadFolder + '_' + dFormat.format(new Date()) + '_' + fileINName);
 		//File file2 = new File(uploadFolder + filePinGenName);
 
 		Files.copy(fileIN, file1.toPath());
