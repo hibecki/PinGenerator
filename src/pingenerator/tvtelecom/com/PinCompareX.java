@@ -50,6 +50,8 @@ LOG.log(Level.INFO,"{0} {1}",new Object[]{"PinCompareX-jobId: ",jobId});
 		
 		PreparedStatement st3 = null;
 		String sql3 = "update job set desc2 = ? where jobid = '" + jobId + "'";
+		PreparedStatement st31 = null;
+		String sql31 = "delete from pin where pin = ?";
 		
 		Statement st4 = null;
 		String sql4 = "update job set status = '_status', dupcount = _ratio where jobid = '" + jobId + "'";
@@ -92,13 +94,17 @@ LOG.log(Level.INFO,"{0} {1}",new Object[]{"PinCompareX-jobId: ",jobId});
 				st2 = con.createStatement();
 				rs2 = st2.executeQuery(sql20);
 				if (rs2.next()) {cAll = rs2.getLong("c");}
-				
+//LOG.log(Level.INFO,"{0} {1}",new Object[]{"PinCompareX","cAll: " + cAll});
 				long cTotal = 0; long cDup = 0;
 				String pin = "";int pos = 0;
 				int percent = 0;
 				int checkCalc = 0; int checkPrev = 0;
 				
 				st3 = con.prepareStatement(sql3);
+				st3.setString(1, "0");
+				st3.executeUpdate();
+				
+				st31 = con.prepareStatement(sql31);
 				
 				rs2.close();
 				rs2 = st2.executeQuery(sql2);
@@ -106,17 +112,21 @@ LOG.log(Level.INFO,"{0} {1}",new Object[]{"PinCompareX-jobId: ",jobId});
 					pin = rs2.getString("PIN");
 					pos = buffer.indexOf(pin);
 					if (pos > -1) {cDup++;
-//LOG.log(Level.INFO,"{0} {1}",new Object[]{"PinGenBatchX","found dup: " + pos + " PIN: " + pin});
+						st31.setString(1, pin);
+						st31.executeUpdate();
+//LOG.log(Level.INFO,"{0} {1}",new Object[]{"PinCompareX","found dup: " + pos + " PIN: " + pin});
 					}
 					percent = (int)Math.floor((cTotal/cAll)*100);
 					checkCalc = (int)Math.floor(percent/10);
+//LOG.log(Level.INFO,"{0} {1}",new Object[]{"PinCompareX","percent: " + percent + " checkCalc: " + checkCalc});
 					if (checkCalc > checkPrev) {
 						checkPrev = checkCalc;
 						st3.setString(1, Integer.toString(percent));
     					st3.executeUpdate();
+LOG.log(Level.INFO,"{0} {1}",new Object[]{"PinCompareX","update Job: " + percent});
 					}
 				}
-LOG.log(Level.INFO,"{0} {1}",new Object[]{"PinGenBatchX","All record: " + cAll + " Total: " + cTotal + " Dup: " + cDup});
+LOG.log(Level.INFO,"{0} {1}",new Object[]{"PinCompareX","All record: " + cAll + " Total: " + cTotal + " Dup: " + cDup});
 				st3.setString(1, Integer.toString(100));
 				st3.executeUpdate();
 				
@@ -124,7 +134,7 @@ LOG.log(Level.INFO,"{0} {1}",new Object[]{"PinGenBatchX","All record: " + cAll +
 	            sql4r = sql4r.replaceAll("_ratio", Long.toString(cDup));
 				st4.executeUpdate(sql4r);
 				result = "succeed";
-LOG.log(Level.INFO,"{0}-{1}",new Object[]{"PinGenBatchX","Done!"});
+LOG.log(Level.INFO,"{0}-{1}",new Object[]{"PinCompareX","Done!"});
 			}
 		} catch(NamingException | SQLException ex) {
 			LOG.log(Level.SEVERE, ex.getMessage(), ex);
@@ -133,6 +143,7 @@ LOG.log(Level.INFO,"{0}-{1}",new Object[]{"PinGenBatchX","Done!"});
             try {
             	if (!result.equals("succeed")) {
             		sql4r = sql4.replaceAll("_status", "F");
+            		sql4r = sql4r.replaceAll("_ratio", "0");
         			st4.executeUpdate(sql4r);
             	}
                 if (rs1 != null) {rs1.close();}if (st1 != null) {st1.close();}

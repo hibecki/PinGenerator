@@ -87,7 +87,7 @@ LOG.log(Level.INFO,"{0} {1}",new Object[]{"PinGenBatchX","sql2: " + sql2});
 LOG.log(Level.INFO,"{0}-{1}",new Object[]{"PinGenBatchX","found duplicated pin while generating: " + Long.toString(++c)});
 LOG.log(Level.INFO,"{0}-{1}",new Object[]{"PinGenBatchX","found continueosly duplicated pin while generating: " + Long.toString(++cConDup)});
 							dup = true;
-							if (c > Utils.maxAllowContinueoslyDuplicated) {dup = false; i = pinAmount;}
+							if ((c > Utils.maxAllowContinuouslyDuplicated)&&(pinAmount < 1000)) {dup = false; i = pinAmount;}
 	                	}
 	                } while (dup);
 	            }

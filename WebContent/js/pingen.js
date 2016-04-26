@@ -194,7 +194,7 @@ function updateDashboard() {
 		var uri = window.url_home + '/MainDashboard';
 	  	xhttp.open("GET", uri, true);
 	  	xhttp.send();
-	  	setTimeout(function(){updateDashboard();},8000);
+	  	setTimeout(function(){updateDashboard();},30000);
   	}
 }
 function updateDashboardContent(digit,countDigit) {
@@ -541,8 +541,6 @@ function comparePinButtonSubmitClick() {
 	});
 }
 function comparePinUpdateProgress(jobId,probar) {
-	alert(jobId);
-	
 	Ink.requireModules(['Ink.Net.Ajax_1','Ink.Dom.Element_1','Ink.UI.ProgressBar_1'], function(Ajax,InkElement,ProgressBar) {
 	    var uri = window.url_home + '/PinCompareCount?jobId=' + jobId;
 	    new Ajax(uri, {
@@ -555,9 +553,13 @@ function comparePinUpdateProgress(jobId,probar) {
 						InkElement.setHTML(Ink.i('pinCompareAction'),'Comparing..');
 						InkElement.setHTML(Ink.i('pinCompareProgressBarCaption'),'<i class="fa fa-cog fa-spin"></i>&nbsp;&nbsp;Comparing...');
 						probar.setValue(Math.ceil(c));
-						if (c < 100) {
-							setTimeout(function(){comparePinUpdateProgress(jobId,probar);},2000);
+						if ((c < 100) && (document.getElementById('pinCompareAction'))) {
+							setTimeout(function(){comparePinUpdateProgress(jobId,probar);},3000);
+						} else {
+							InkElement.setHTML(Ink.i('pinCompareProgressBarCaption'),'<div style="color:white"><i class="fa fa-cog"></i>&nbsp;&nbsp;Succeed</div>');
+							InkElement.setHTML(Ink.i('pinCompareAction'),'Download duplicated PIN as CSV file: click <a href="'+window.url_home + '/PinHistDownloadCSV?status=D&jobId='+jobId+'">here</a>');
 						}
+					
 					}
 	            }
 	        }, 

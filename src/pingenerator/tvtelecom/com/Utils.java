@@ -13,7 +13,7 @@ public class Utils {
     public static String ExportFilePath = System.getProperty("catalina.base") + "/Exports";
     public static String appPath = "/PinGenerator/";
     //public static String appPath = "/";
-    public static long maxAllowContinueoslyDuplicated = 100; 
+    public static long maxAllowContinuouslyDuplicated = 1000;
     
     
     public static String csvFileForProvince = "/Single/SingleData/province.csv";

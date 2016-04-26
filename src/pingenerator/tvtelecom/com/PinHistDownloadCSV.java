@@ -21,26 +21,28 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
-@WebServlet("/PinDownloadCSV")
-public class PinDownloadCSV extends HttpServlet {
+@WebServlet("/PinHistDownloadCSV")
+public class PinHistDownloadCSV extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-       
-    public PinDownloadCSV() {
+
+    public PinHistDownloadCSV() {
         super();
     }
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        Logger LOG = Logger.getLogger(PinDownloadCSV.class.getName());
+        Logger LOG = Logger.getLogger(PinHistDownloadCSV.class.getName());
         request.setCharacterEncoding(Utils.CharacterEncoding);
 		//HttpSession session = request.getSession(true);
 		//String userId = (String)session.getAttribute("userId");
+        String jobId = request.getParameter("jobId");
+        String status = request.getParameter("status");
         String digit = request.getParameter("digit");
         
-LOG.log(Level.INFO,"PinDownloadCSV digit:{0}",new Object[]{digit});
+LOG.log(Level.INFO,"PinHistDownloadCSV jobId: {0} status: {1} digit:{2}",new Object[]{jobId,status,digit});
 
 		Connection con = null;
 		Statement st1 = null;
-		String sql1 ="select * from pin where digit = " + digit + " and status = 'A'";
+		String sql1 ="select * from pinhist where jobid = '" + jobId + "' and status = '"+status+"'";
 		ResultSet rs1 = null;
 		
 		String result="";
@@ -54,7 +56,7 @@ LOG.log(Level.INFO,"PinDownloadCSV digit:{0}",new Object[]{digit});
 			while (rs1.next()) {c++;
 				result += rs1.getString("PIN")+"\r\n";
 			}
-LOG.log(Level.INFO,"PinDownloadCSV amount:{0}",new Object[]{c});
+LOG.log(Level.INFO,"PinHistDownloadCSV amount:{0}",new Object[]{c});
 		} catch(NamingException | SQLException ex) {
 			LOG.log(Level.SEVERE, ex.getMessage(), ex);
 			result = "failed";
@@ -67,7 +69,10 @@ LOG.log(Level.INFO,"PinDownloadCSV amount:{0}",new Object[]{c});
 		    }
 		}
 		SimpleDateFormat dFileFormat = new SimpleDateFormat("yyMMdd_hhmmss");
-		String fileName = "PinStock"+digit+"digit_"+dFileFormat.format(new Date());
+		String fileName = "Pin_"+dFileFormat.format(new Date());
+		if (status.equals("D")) {
+			fileName = "PinDup_"+dFileFormat.format(new Date());
+		}
 		response.setContentType("text/csv");
 		response.setHeader("Content-Disposition", "attachment; filename=\""+fileName+".csv\"");
 		response.setCharacterEncoding(Utils.CharacterEncoding);

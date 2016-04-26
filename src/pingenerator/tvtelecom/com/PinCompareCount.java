@@ -32,7 +32,7 @@ public class PinCompareCount extends HttpServlet {
         request.setCharacterEncoding(Utils.CharacterEncoding);    
         String jobId = request.getParameter("jobId");
         
-LOG.log(Level.INFO,"PinCompareCount jobId: {0}",new Object[]{jobId});
+//LOG.log(Level.INFO,"PinCompareCount jobId: {0}",new Object[]{jobId});
 
 		Connection con = null;
 		Statement st1 = null;
