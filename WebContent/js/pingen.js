@@ -517,7 +517,7 @@ function comparePinButtonSubmitClick() {
 	        if(request.readyState == 4){
 	            try {
 	                var resp = JSON.parse(request.response);
-	                comparePinUpdateProgress(resp.jobid);
+	                comparePinUpdateProgress(resp.jobId,probar);
 	            } catch (e){
 	                var resp = {
 	                    result: 'failed on network!',
@@ -529,40 +529,35 @@ function comparePinButtonSubmitClick() {
 	    };
 
 	    request.upload.addEventListener('progress', function(e){
-	    	probar.setValue(Math.ceil(e.loaded/e.total) * 20);
+	    	probar.setValue(Math.ceil(e.loaded/e.total) * 100);
 	    	//if (e.loaded == e.total) {comparePinProgress(fileIN.files[0]);}
 	    }, false);
 
 	    var crs = new Carousel('#pinCompareCarousel');crs.nextPage();
 	    
-	    request.open('POST', window.url_home + '/PinCompareUpload');
+	    request.open('POST', window.url_home + '/PinCompare');
 	    request.send(data);
 	    
 	});
 }
-function comparePinUpdateProgress(jobid) {
-	alert(jobid);
-
-	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Carousel_1','Ink.UI.ProgressBar_1'], function(Ajax,FormSerialize,InkElement,Carousel,ProgressBar) {
-	    var form = Ink.i('formPinGenBatch');
-	    var formData = FormSerialize.serialize(form);
-	    var pinAmount = formData.pinAmount;
-	    Ink.i('pinDigit').disabled = true;Ink.i('pinAmount').disabled = true;
-	    Ink.i('buttonGenerate').disabled = true;Ink.i('buttonCancel').disabled = true;
-	    var uri = window.url_home + '/PinCompareCount?jobid=' + jobid;
+function comparePinUpdateProgress(jobId,probar) {
+	alert(jobId);
+	
+	Ink.requireModules(['Ink.Net.Ajax_1','Ink.Dom.Element_1','Ink.UI.ProgressBar_1'], function(Ajax,InkElement,ProgressBar) {
+	    var uri = window.url_home + '/PinCompareCount?jobId=' + jobId;
 	    new Ajax(uri, {
-	        method: 'POST',
-	        postBody: formData,
+	        method: 'GET',
 	        onSuccess: function(obj) {
 	            if(obj && obj.responseJSON) {
-	            	var result = obj.responseJSON['result'];var jobId = obj.responseJSON['jobId'];
-	Ink.log("result: " + result);Ink.log("jobId: " + jobId);
+	            	var result = obj.responseJSON['result'];var c = obj.responseJSON['count'];
+	Ink.log("result: " + result);
 					if(result==="succeed"){
-						var crs = new Carousel('#pinGenBatchCarousel');crs.nextPage();
 						InkElement.setHTML(Ink.i('pinCompareAction'),'Comparing..');
-						var probar = new ProgressBar('#pinCompareProgressBar');
-						//setTimeout(function(){comparePinUpdateProgress(probar,jobId,pinAmount);},2000);
-						setTimeout(function(){comparePinUpdateProgress(probar,jobId,pinAmount);},2000);
+						InkElement.setHTML(Ink.i('pinCompareProgressBarCaption'),'<i class="fa fa-cog fa-spin"></i>&nbsp;&nbsp;Comparing...');
+						probar.setValue(Math.ceil(c));
+						if (c < 100) {
+							setTimeout(function(){comparePinUpdateProgress(jobId,probar);},2000);
+						}
 					}
 	            }
 	        }, 
@@ -571,8 +566,6 @@ function comparePinUpdateProgress(jobid) {
 	        }
 	    });
 	});
-}
-function comparePinUpdateProgress(probar,jobId,pinAmount) {
 	
 }
 
