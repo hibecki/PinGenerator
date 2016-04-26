@@ -53,7 +53,7 @@ LOG.log(Level.INFO,"PinExportCSV JobId:{0}",new Object[]{jobId});
 			while (rs1.next()) {
 				result += rs1.getString("PIN")+"\r\n";
 			}
-LOG.log(Level.INFO,"PinExportCSV result:{0}",new Object[]{result});
+//LOG.log(Level.INFO,"PinExportCSV result:{0}",new Object[]{result});
 		} catch(NamingException | SQLException ex) {
 			LOG.log(Level.SEVERE, ex.getMessage(), ex);
 			result = "failed";

@@ -20,6 +20,15 @@ function menuPinGenSpecific() {
 	});
 }
 
+function menuPinGenVIP() {
+	Ink.requireModules(['Ink.Net.Ajax_1','Ink.Dom.Element_1'], function(Ajax,InkElement) {
+		var container = Ink.i('main-panel');
+		Ajax.load('pingen-vip.html', function (res) {
+		    InkElement.setHTML(container,res);
+		});
+	});
+}
+
 function menuPinCompare() {
 	Ink.requireModules(['Ink.Net.Ajax_1','Ink.Dom.Element_1'], function(Ajax,InkElement) {
 		var container = Ink.i('main-panel');
@@ -230,7 +239,9 @@ Ink.log("result: " + result);Ink.log("name: " + name);
     						var pre = '&nbsp;';
     						if(name.length<20){var l = name.length/2;l = 10 - l;for(var i = 1;i <= l; i++){pre += '&nbsp;';}}
     						name = pre+name+pre;
-    						InkElement.appendHTML(Ink.i('bar-top-nav'),'<ul class="menu horizontal black push-right"><li><a>'+name+'</a><ul class="submenu" style="background:#1b99ee;"><li><a onclick="" style="color:white;">Change password</a></li><li><a onclick="menuSignout()" style="color:white;">Sign out</a></li></ul></li></ul>');
+    						//InkElement.appendHTML(Ink.i('bar-top-nav'),'<ul class="menu horizontal black push-right"><li><a>'+name+'</a><ul class="submenu" style="background:#1b99ee;"><li><a onclick="" style="color:white;">Change password</a></li><li><a onclick="menuSignout()" style="color:white;">Sign out</a></li></ul></li></ul>');
+    						InkElement.appendHTML(Ink.i('bar-top-nav'),'<ul class="menu horizontal black push-right"><li><a>'+name+'</a></li></ul>');
+    						
     						setTimeout(function(){updateDashboard();},5000);
     					} else {
     					    if (typeof crsLogin == "undefined") {crsLogin = new Carousel('#loginCarousel');}
@@ -337,9 +348,8 @@ function pinGenSpecButtonPlusClick(rowMore) {
 		Ink.i('pinCount').value = pinCountNew;
 	});
 }
-
 function pinGenSpecButtonAddClick() {
-	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Modal_1'], function(Ajax,FormSerialize,InkElement,Modal) {
+	Ink.requireModules(['Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Modal_1'], function(FormSerialize,InkElement,Modal) {
 	    var form = Ink.i('formPinGenSpec');
         var formData = FormSerialize.serialize(form);
 		//InkElement.setHTML(Ink.i('pinConfirm'),'<b style="color:red">' + formData.pin + '</b>');
@@ -347,10 +357,9 @@ function pinGenSpecButtonAddClick() {
 		modalPinGenSpec.open(); 
 	});
 }
-
 function pinGenSpecButtonConfirmClick() {
 	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Carousel_1','Ink.UI.ProgressBar_1'], function(Ajax,FormSerialize,InkElement,Carousel,ProgressBar) {
-	    var pinCount = Ink.i('pinCount');
+		var pinCount = Ink.i('pinCount');
 Ink.log("pinCount: " + pinCount.value);
 	    var pValue;var aPin = [];
 		for (var i = 1; i <= pinCount.value; i++) {
@@ -435,6 +444,201 @@ Ink.log("result: " + result);
 	    });
 	});
 }
+
+
+function pinGenVIPButtonBrowseFileINClick() {
+	Ink.requireModules(['Ink.Dom.Element_1'], function(InkElement) {
+	    var inputBrowse = Ink.i('fileINHidden');
+	    inputBrowse.click();
+	});
+}
+function pinGenVIPInputBrowseFileINChange() {
+	Ink.requireModules(['Ink.Dom.Element_1'], function(InkElement) {
+	    var inputBrowse = Ink.i('fileINHidden');
+	    var fileIN = Ink.i('fileIN');
+	    var file = inputBrowse.files[0];
+        if ('name' in file) {fileIN.value = file.name;}
+	});
+}
+function pinGenVIPButtonPlusClick(rowMore) {
+	Ink.requireModules(['Ink.Dom.Element_1'], function(InkElement) {
+		var pinCount = Number(Ink.i('pinCount').value);
+		pinCountNew = pinCount + rowMore;
+		for (var i = pinCount+1; i <= pinCountNew; i++) {
+			var pinInputHtml = '<div class="control-group column-group"><div class="control">';
+			pinInputHtml += '<input id="pin'+i+'" name="pin'+i+'" style="width:15em;" type="text" placeholder="VIP Pin" maxlength="15" onkeypress=\'return (event.charCode >= 48 && event.charCode <= 57)\'>';
+			pinInputHtml += '</div><div id="pinSpin'+i+'" style="font-size:1.6em;margin-top:-.3em;margin-left:.8em"></div></div>';
+			InkElement.appendHTML(Ink.i('pinInput'),pinInputHtml);
+		}
+		Ink.i('pinCount').value = pinCountNew;
+	});
+}
+function pinGenVIPButtonCAMClick() {
+	Ink.requireModules(['Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Modal_1'], function(FormSerialize,InkElement,Modal) {
+		var fileIN = Ink.i('fileINHidden');
+		if (fileIN.files.length != 0) {
+		    var form = Ink.i('formPinGenVIP');
+	        var formData = FormSerialize.serialize(form);
+			//InkElement.setHTML(Ink.i('pinConfirm'),'<b style="color:red">' + formData.pin + '</b>');
+	        if (typeof modalPinGenVIP == "undefined") {modalPinGenVIP = new Modal('#formPinGenVIPConfirm');}
+			modalPinGenVIP.open();
+		} else {
+			var alert = '<div class="ink-alert block" role="alert"><button class="ink-dismiss">&times;</button><h4>Missing file PIN history!</h4>';
+			alert += '<p>Please browse for file PIN history to compare with VIP PINs</p></div>';
+			InkElement.setHTML(Ink.i('pinGenVIPAlert'),alert);
+		}
+	});
+}
+function pinGenVIPButtonConfirmClick() {
+	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Carousel_1','Ink.UI.ProgressBar_1'], function(Ajax,FormSerialize,InkElement,Carousel,ProgressBar) {
+		InkElement.setHTML(Ink.i('pinGenVIPAlert'),'');
+		var fileIN = Ink.i('fileINHidden');
+	    var data = new FormData();
+	    data.append('fileINHidden', fileIN.files[0]);
+		//var probar = new ProgressBar('#pinCompareProgressBar');
+		
+	    var request = new XMLHttpRequest();
+	    request.onreadystatechange = function(){
+	        if(request.readyState == 4){
+	            try {
+	                var resp = JSON.parse(request.response);
+	        		
+	        		var pinCount = Ink.i('pinCount');
+	        Ink.log("pinCount: " + pinCount.value);
+	        	    var pValue;var aPin = [];
+	        		for (var i = 1; i <= pinCount.value; i++) {
+	        			pValue = Ink.i('pin'+i).value;
+	        Ink.log("i " + i);
+	        			if (pValue.match(/\S/)) {aPin.push(pValue);Ink.log("push i " + i);}
+	        		}
+	        		InkElement.setHTML(Ink.i('pinInput'),'');
+	        		pinCount.value = aPin.length;
+	        		for (var i = 0; i < aPin.length; i++) {
+	        			var pinInputHtml = '<div class="control-group column-group"><div class="control">';
+	        			pinInputHtml += '<input id="pin'+i+'" name="pin'+i+'" value="'+aPin[i]+'" style="width:15em;" type="text" placeholder="VIP Pin" maxlength="15" onkeypress=\'return (event.charCode >= 48 && event.charCode <= 57)\'>';
+	        			pinInputHtml += '</div><div id="pinSpin'+i+'" style="font-size:1.6em;margin-top:-.3em;margin-left:.8em"><i class="fa fa-cog fa-spin"></i></div>&nbsp;&nbsp;&nbsp;<div id="pinMsg'+i+'"></div></div>';
+	        			InkElement.appendHTML(Ink.i('pinInput'),pinInputHtml);
+	        			Ink.i('pin'+i).disabled = true;
+	        		}
+	        		var form = Ink.i('formPinGenVIP');
+	        	    var formData = FormSerialize.serialize(form);
+	        	    Ink.i('buttonCAM').disabled = true;Ink.i('buttonCancel').disabled = true;
+	        	    var uri = window.url_home + '/PinGenVIP?s=P';
+	        	    new Ajax(uri, {
+	        	        method: 'POST',
+	        	        postBody: formData,
+	        	        onSuccess: function(obj) {
+	        	            if(obj && obj.responseJSON) {
+	        	            	var result = obj.responseJSON['result'];var jobId = obj.responseJSON['jobId'];
+	        Ink.log("result: " + result);Ink.log("jobId: " + jobId);
+	        					if(result==="succeed"){
+	        						var countSuccess = 0;
+	        						for (var i = 0; i < aPin.length; i++) {
+	        							var uri = window.url_home + '/PinGenVIPX?pin='+aPin[i]+'&pinId='+i+'&jobId='+jobId;
+	        						    new Ajax(uri, {asynchronous: false,
+	        						        method: 'GET',
+	        						        onSuccess: function(obj) {
+	        						            if(obj && obj.responseJSON) {
+	        						            	var result = obj.responseJSON['result'];var pinId = obj.responseJSON['pinId'];
+	        				Ink.log("result: " + result);Ink.log("pinId: " + pinId);
+	        										if(result==="duplicated"){
+	        											InkElement.setHTML(Ink.i('pinSpin'+pinId),'<i class="fa fa-times-circle" style="color:red"></i>');
+	        											InkElement.setHTML(Ink.i('pinMsg'+pinId),'<div class="ink-label red" style="font-size:.5em;height:1.8em;margin-top:1.4em;">Duplicated PIN</div>');
+	        										} else if(result==="succeed"){countSuccess++;Ink.log("countSuccess: " + countSuccess);
+	        											InkElement.setHTML(Ink.i('pinSpin'+pinId),'<i class="fa fa-check-circle" style="color:green"></i>');
+	        										} else {
+	        											InkElement.setHTML(Ink.i('pinSpin'+pinId),'<i class="fa fa-times-circle" style="color:red"></i>');
+	        										}
+	        						            }
+	        						        }, 
+	        						        onFailure: function() {result="failed on network!"
+	        				Ink.log("result: " + result);
+	        						        	InkElement.setHTML(Ink.i('pinSpin'+i),'<i class="fa fa-times-circle" style="color:red">Network</i>');
+	        						        }
+	        						    });
+	        						}
+	        						var lastJobStatus = 'D';Ink.log("countSuccess: " + countSuccess);
+	        						if (countSuccess > 0) {lastJobStatus = 'S';InkElement.setHTML(Ink.i('pinGenVIPJobId'),'Job ID: <b style="color:red">' + jobId + '</b>');}Ink.log("lastJobStatus: " + lastJobStatus);
+	        						InkElement.appendHTML(Ink.i('pinGenVIPJobId'),'<br/>Export as CSV file: click <a href="'+window.url_home + '/PinExportCSV?jobId='+jobId+'">here</a>');
+	        						var uri = window.url_home + '/PinGenVIP?s='+lastJobStatus+'&jobid='+jobId;
+	        					    new Ajax(uri, {
+	        					        method: 'POST',
+	        					        postBody: formData,
+	        					        onSuccess: function(obj) {
+	        					            if(obj && obj.responseJSON) {
+	        					            	var result = obj.responseJSON['result'];var jobId = obj.responseJSON['jobId'];
+	        Ink.log("result: " + result);Ink.log("jobId: " + jobId);
+	        									if(result==="succeed"){
+	        										InkElement.setHTML(Ink.i('pinGenVIPButton'),'<div class="push-left"><button class="ink-button" onclick="goHome()">&nbsp;&nbsp;&nbsp;Close&nbsp;&nbsp;&nbsp;</button></div>');
+	        										InkElement.remove('pinGenVIPPlus');InkElement.remove('pinGenVIPPlus');
+	        									}
+	        								}
+	        				            }, 
+	        				            onFailure: function() {result="failed on network!";
+	        Ink.log("result: " + result);
+	        				            }
+	        					    });
+	        					}
+	        	            }
+	        	        }, 
+	        	        onFailure: function() {result="failed on network!";
+	        Ink.log("result: " + result);
+	        	        }
+	        	    });
+	                
+	                
+	                
+	                
+	                
+	                
+	                
+	                
+	                
+	                
+	                
+	                
+	                
+	                
+	                
+	                
+	                
+	                
+	                
+	                
+	                
+	                
+	                
+	                
+	                
+	                
+	                
+	                //comparePinUpdateProgress(resp.jobId,probar);
+	            } catch (e){
+	                var resp = {
+	                    result: 'failed on network!',
+	                    fileName: 'Unknown error occurred: [' + request.responseText + ']'
+	                };
+	            }
+	            console.log(resp.result + ': ' + resp.fileName);
+	        }
+	    };
+
+	    //request.upload.addEventListener('progress', function(e){
+	    //	probar.setValue(Math.ceil(e.loaded/e.total) * 100);
+	    //}, false);
+
+	    //var crs = new Carousel('#pinCompareCarousel');crs.nextPage();
+	    
+	    request.open('POST', window.url_home + '/PinCompare');
+	    request.send(data);
+		
+
+
+	});
+}
+
+
+
 
 function comparePinButtonBrowseFileINClick() {
 	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Modal_1','Ink.UI.FormValidator_1'], function(Ajax,FormSerialize,InkElement,Modal,FormValidator) {

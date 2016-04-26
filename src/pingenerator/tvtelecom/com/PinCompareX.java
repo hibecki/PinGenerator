@@ -51,7 +51,9 @@ LOG.log(Level.INFO,"{0} {1}",new Object[]{"PinCompareX-jobId: ",jobId});
 		PreparedStatement st3 = null;
 		String sql3 = "update job set desc2 = ? where jobid = '" + jobId + "'";
 		PreparedStatement st31 = null;
-		String sql31 = "delete from pin where pin = ?";
+		String sql31 = "update pin set status = 'D', jobid = '" + jobId + "' where pin = ?";
+		PreparedStatement st32 = null;
+		String sql32 = "delete from pin where pin = ?";
 		
 		Statement st4 = null;
 		String sql4 = "update job set status = '_status', dupcount = _ratio where jobid = '" + jobId + "'";
@@ -105,6 +107,7 @@ LOG.log(Level.INFO,"{0} {1}",new Object[]{"PinCompareX-jobId: ",jobId});
 				st3.executeUpdate();
 				
 				st31 = con.prepareStatement(sql31);
+				st32 = con.prepareStatement(sql32);
 				
 				rs2.close();
 				rs2 = st2.executeQuery(sql2);
@@ -114,7 +117,8 @@ LOG.log(Level.INFO,"{0} {1}",new Object[]{"PinCompareX-jobId: ",jobId});
 					if (pos > -1) {cDup++;
 						st31.setString(1, pin);
 						st31.executeUpdate();
-//LOG.log(Level.INFO,"{0} {1}",new Object[]{"PinCompareX","found dup: " + pos + " PIN: " + pin});
+						st32.setString(1, pin);
+						st32.executeUpdate();
 					}
 					percent = (int)Math.floor((cTotal/cAll)*100);
 					checkCalc = (int)Math.floor(percent/10);
