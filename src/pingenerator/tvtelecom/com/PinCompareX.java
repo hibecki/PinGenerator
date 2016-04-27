@@ -61,7 +61,8 @@ LOG.log(Level.INFO,"{0} {1}",new Object[]{"PinCompareX-jobId: ",jobId});
 		
 		String result="failed";
 		
-		String uploadFolder = getServletContext().getInitParameter("uploadFolder");
+		//String uploadFolder = getServletContext().getInitParameter("uploadFolder");
+		String uploadFolder = Utils.PathUpload;
 		try {
 			Context ctx = new InitialContext();
 			DataSource ds = (DataSource)ctx.lookup("java:comp/env/jdbc/PinGen");
@@ -113,7 +114,8 @@ LOG.log(Level.INFO,"{0} {1}",new Object[]{"PinCompareX-jobId: ",jobId});
 				rs2 = st2.executeQuery(sql2);
 				while (rs2.next()) {cTotal++;
 					pin = rs2.getString("PIN");
-					pos = buffer.indexOf("\r\n"+pin+"\r\n");
+					//pos = buffer.indexOf("\r\n"+pin+"\r\n");
+					pos = buffer.indexOf(","+pin+"\r\n");
 					if (pos > -1) {cDup++;
 						st31.setString(1, pin);
 						st31.executeUpdate();

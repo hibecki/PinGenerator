@@ -54,8 +54,9 @@ public class PinGenVIP extends HttpServlet {
 		SimpleDateFormat dFormat = new SimpleDateFormat("yyMMddhhmmss");
 		String jobId = dFormat.format(new Date());
 		
-		String uploadFolder = getServletContext().getInitParameter("uploadFolder");
-
+		//String uploadFolder = getServletContext().getInitParameter("uploadFolder");
+		String uploadFolder = Utils.PathUpload;
+		
 		String fileNameUploaded = 'V' + jobId + '_' + fileINName;
 		File file1 = new File(uploadFolder + fileNameUploaded);
 		//File file2 = new File(uploadFolder + filePinGenName);

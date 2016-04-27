@@ -38,7 +38,9 @@ public class PinGenVIPCompare extends HttpServlet {
 		
 LOG.log(Level.INFO,"PinGenVIPCompare - userId:{0} pin:{1} fileName:{2}",new Object[]{userId,pin,fileName});
 
-		String uploadFolder = getServletContext().getInitParameter("uploadFolder");
+		//String uploadFolder = getServletContext().getInitParameter("uploadFolder");
+		String uploadFolder = Utils.PathUpload;
+		
 		int len;
 		char[] chr = new char[4096];
 		final StringBuffer buffer = new StringBuffer();
@@ -54,13 +56,14 @@ LOG.log(Level.INFO,"PinGenVIPCompare - userId:{0} pin:{1} fileName:{2}",new Obje
 		String result="";
 		String fileNameResult = 'R' + fileName;
 		
-		int pos = buffer.indexOf("\r\n"+pin+"\r\n");
+		//int pos = buffer.indexOf("\r\n"+pin+"\r\n");
+		int pos = buffer.indexOf(","+pin+"\r\n");
 		if (pos > -1) {
 			result = "duplicated";
 		} else {
 			result = "succeed";
 			try {
-				Path pathDummy = Paths.get(Utils.MaxVIPDummySerialFilePath);
+				Path pathDummy = Paths.get(Utils.PathFileVIPSerial);
 				long maxVIPDummySerial = 0;
 				if (Files.exists(pathDummy)) {
 					byte[] byteMaxVIPDummySerial = Files.readAllBytes(pathDummy);

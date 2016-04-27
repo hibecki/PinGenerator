@@ -7,6 +7,6 @@
   <context-param>
     <description>Location to store uploaded file</description>
     <param-name>uploadFolder</param-name>
-    <param-value>C:\home\pingen\tomcat7\uploads\</param-value>
+    <param-value>/home/pingen/tomcat7/uploads/</param-value>
   </context-param>
 </web-app>

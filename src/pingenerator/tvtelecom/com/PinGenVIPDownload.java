@@ -32,7 +32,8 @@ public class PinGenVIPDownload extends HttpServlet {
         String fileName = request.getParameter("fileName");
         
 LOG.log(Level.INFO,"PinGenVIPDownload fileName:{0}",new Object[]{fileName});
-		String uploadFolder = getServletContext().getInitParameter("uploadFolder");
+		//String uploadFolder = getServletContext().getInitParameter("uploadFolder");
+		String uploadFolder = Utils.PathUpload;
 		fileName = uploadFolder + 'R' + fileName;
 		String mappedVIP = "";
 		String result="succeed";
