@@ -476,12 +476,26 @@ function pinGenVIPButtonPlusClick(rowMore) {
 function pinGenVIPButtonCAMClick() {
 	Ink.requireModules(['Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Modal_1'], function(FormSerialize,InkElement,Modal) {
 		var fileIN = Ink.i('fileINHidden');
+		var foundPin = false;
+		var pinCount = Ink.i('pinCount');
+	    var pValue;
+		for (var i = 1; i <= pinCount.value; i++) {
+			pValue = Ink.i('pin'+i).value;
+			if (pValue.match(/\S/)) {foundPin = true;}
+		}
+        		
 		if (fileIN.files.length != 0) {
-		    var form = Ink.i('formPinGenVIP');
-	        var formData = FormSerialize.serialize(form);
-			//InkElement.setHTML(Ink.i('pinConfirm'),'<b style="color:red">' + formData.pin + '</b>');
-	        if (typeof modalPinGenVIP == "undefined") {modalPinGenVIP = new Modal('#formPinGenVIPConfirm');}
-			modalPinGenVIP.open();
+			if (foundPin) {
+			    //var form = Ink.i('formPinGenVIPFileIN');
+		        //var formData = FormSerialize.serialize(form);
+				//InkElement.setHTML(Ink.i('pinConfirm'),'<b style="color:red">' + formData.pin + '</b>');
+		        if (typeof modalPinGenVIP == "undefined") {modalPinGenVIP = new Modal('#formPinGenVIPConfirm');}
+				modalPinGenVIP.open();
+			} else {
+				var alert = '<div class="ink-alert block" role="alert"><button class="ink-dismiss">&times;</button><h4>Missing VIP PIN!</h4>';
+				alert += '<p>Please enter VIP PIN</p></div>';
+				InkElement.setHTML(Ink.i('pinGenVIPAlert'),alert);
+			}
 		} else {
 			var alert = '<div class="ink-alert block" role="alert"><button class="ink-dismiss">&times;</button><h4>Missing file PIN history!</h4>';
 			alert += '<p>Please browse for file PIN history to compare with VIP PINs</p></div>';
@@ -503,6 +517,9 @@ function pinGenVIPButtonConfirmClick() {
 	            try {
 	                var resp = JSON.parse(request.response);
 	        		
+	                Ink.i('fileIN').disabled = true;
+	                Ink.i('buttonBrowseFileIN').disabled = true;
+	                
 	        		var pinCount = Ink.i('pinCount');
 	        Ink.log("pinCount: " + pinCount.value);
 	        	    var pValue;var aPin = [];
@@ -523,31 +540,30 @@ function pinGenVIPButtonConfirmClick() {
 	        		var form = Ink.i('formPinGenVIP');
 	        	    var formData = FormSerialize.serialize(form);
 	        	    Ink.i('buttonCAM').disabled = true;Ink.i('buttonCancel').disabled = true;
-	        	    var uri = window.url_home + '/PinGenVIP?s=P';
+	        	    var uri = window.url_home + '/PinGenVIPX?s=P&jobid=' + resp.jobId;
 	        	    new Ajax(uri, {
 	        	        method: 'POST',
 	        	        postBody: formData,
 	        	        onSuccess: function(obj) {
 	        	            if(obj && obj.responseJSON) {
-	        	            	var result = obj.responseJSON['result'];var jobId = obj.responseJSON['jobId'];
-	        Ink.log("result: " + result);Ink.log("jobId: " + jobId);
+	        	            	var result = obj.responseJSON['result'];
 	        					if(result==="succeed"){
 	        						var countSuccess = 0;
 	        						for (var i = 0; i < aPin.length; i++) {
-	        							var uri = window.url_home + '/PinGenVIPX?pin='+aPin[i]+'&pinId='+i+'&jobId='+jobId;
+	        							var uri = window.url_home + '/PinGenVIPCompare?pin='+aPin[i]+'&fileName='+resp.fileName;
 	        						    new Ajax(uri, {asynchronous: false,
 	        						        method: 'GET',
 	        						        onSuccess: function(obj) {
 	        						            if(obj && obj.responseJSON) {
-	        						            	var result = obj.responseJSON['result'];var pinId = obj.responseJSON['pinId'];
-	        				Ink.log("result: " + result);Ink.log("pinId: " + pinId);
+	        						            	var result = obj.responseJSON['result'];
+	        				Ink.log("result: " + result + " pin: " +  obj.responseJSON['pin']);
 	        										if(result==="duplicated"){
-	        											InkElement.setHTML(Ink.i('pinSpin'+pinId),'<i class="fa fa-times-circle" style="color:red"></i>');
-	        											InkElement.setHTML(Ink.i('pinMsg'+pinId),'<div class="ink-label red" style="font-size:.5em;height:1.8em;margin-top:1.4em;">Duplicated PIN</div>');
+	        											InkElement.setHTML(Ink.i('pinSpin'+i),'<i class="fa fa-times-circle" style="color:red"></i>');
+	        											InkElement.setHTML(Ink.i('pinMsg'+i),'<div class="ink-label red" style="font-size:.5em;height:1.8em;margin-top:1.4em;">Duplicated PIN</div>');
 	        										} else if(result==="succeed"){countSuccess++;Ink.log("countSuccess: " + countSuccess);
-	        											InkElement.setHTML(Ink.i('pinSpin'+pinId),'<i class="fa fa-check-circle" style="color:green"></i>');
+	        											InkElement.setHTML(Ink.i('pinSpin'+i),'<i class="fa fa-check-circle" style="color:green"></i>');
 	        										} else {
-	        											InkElement.setHTML(Ink.i('pinSpin'+pinId),'<i class="fa fa-times-circle" style="color:red"></i>');
+	        											InkElement.setHTML(Ink.i('pinSpin'+i),'<i class="fa fa-times-circle" style="color:red"></i>');
 	        										}
 	        						            }
 	        						        }, 
@@ -558,9 +574,9 @@ function pinGenVIPButtonConfirmClick() {
 	        						    });
 	        						}
 	        						var lastJobStatus = 'D';Ink.log("countSuccess: " + countSuccess);
-	        						if (countSuccess > 0) {lastJobStatus = 'S';InkElement.setHTML(Ink.i('pinGenVIPJobId'),'Job ID: <b style="color:red">' + jobId + '</b>');}Ink.log("lastJobStatus: " + lastJobStatus);
-	        						InkElement.appendHTML(Ink.i('pinGenVIPJobId'),'<br/>Export as CSV file: click <a href="'+window.url_home + '/PinExportCSV?jobId='+jobId+'">here</a>');
-	        						var uri = window.url_home + '/PinGenVIP?s='+lastJobStatus+'&jobid='+jobId;
+	        						if (countSuccess > 0) {lastJobStatus = 'S';InkElement.setHTML(Ink.i('pinGenVIPJobId'),'Job ID: <b style="color:red">' + resp.jobId + '</b>');}Ink.log("lastJobStatus: " + lastJobStatus);
+	        						InkElement.appendHTML(Ink.i('pinGenVIPJobId'),'<br/>Download result as CSV file: click <a href="'+window.url_home + '/PinGenVIPDownload?fileName='+resp.fileName+'">here</a>');
+	        						var uri = window.url_home + '/PinGenVIPX?s='+lastJobStatus+'&jobid='+resp.jobId;
 	        					    new Ajax(uri, {
 	        					        method: 'POST',
 	        					        postBody: formData,
@@ -590,22 +606,7 @@ function pinGenVIPButtonConfirmClick() {
 	                
 	                
 	                
-	                
-	                
-	                
-	                
-	                
-	                
-	                
-	                
-	                
-	                
-	                
-	                
-	                
-	                
-	                
-	                
+	              
 	                
 	                
 	                
@@ -619,17 +620,17 @@ function pinGenVIPButtonConfirmClick() {
 	                    fileName: 'Unknown error occurred: [' + request.responseText + ']'
 	                };
 	            }
-	            console.log(resp.result + ': ' + resp.fileName);
+console.log(resp.result + ': ' + resp.fileName + ': ' + resp.jobId);
 	        }
 	    };
 
 	    //request.upload.addEventListener('progress', function(e){
-	    //	probar.setValue(Math.ceil(e.loaded/e.total) * 100);
+	    	//probar.setValue(Math.ceil(e.loaded/e.total) * 100);
 	    //}, false);
 
 	    //var crs = new Carousel('#pinCompareCarousel');crs.nextPage();
 	    
-	    request.open('POST', window.url_home + '/PinCompare');
+	    request.open('POST', window.url_home + '/PinGenVIP');
 	    request.send(data);
 		
 
@@ -783,7 +784,7 @@ function loadPinButtonBrowseFileINClick() {
 }
 
 function loadPinInputBrowseFileINChange() {
-	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Modal_1','Ink.UI.FormValidator_1'], function(Ajax,FormSerialize,InkElement,Modal,FormValidator) {
+	Ink.requireModules(['Ink.Dom.Element_1'], function(InkElement) {
 	    var inputBrowse = Ink.i('buttonBrowseFileINHidden');
 	    var fileIN = Ink.i('fileIN');
 	    var file = inputBrowse.files[0];

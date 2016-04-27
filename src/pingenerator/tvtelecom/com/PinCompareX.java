@@ -113,7 +113,7 @@ LOG.log(Level.INFO,"{0} {1}",new Object[]{"PinCompareX-jobId: ",jobId});
 				rs2 = st2.executeQuery(sql2);
 				while (rs2.next()) {cTotal++;
 					pin = rs2.getString("PIN");
-					pos = buffer.indexOf(pin);
+					pos = buffer.indexOf("\r\n"+pin+"\r\n");
 					if (pos > -1) {cDup++;
 						st31.setString(1, pin);
 						st31.executeUpdate();

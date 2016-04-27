@@ -14,6 +14,10 @@ public class Utils {
     public static String appPath = "/PinGenerator/";
     //public static String appPath = "/";
     public static long maxAllowContinuouslyDuplicated = 1000;
+    //public static String MaxVIPDummySerialFilePath = "/home/pingen/tomcat7/uploads/vipserial";
+    public static String MaxVIPDummySerialFilePath = "C:/home/pingen/tomcat7/settings/vipserial";
+    
+    
     
     
     public static String csvFileForProvince = "/Single/SingleData/province.csv";

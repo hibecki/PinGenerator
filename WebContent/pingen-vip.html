@@ -2,6 +2,8 @@
 <div>
 <div id="pinGenVIPJobId"></div><br/>
 <div id="pinGenVIPAlert"></div>
+
+
 <form id="formPinGenVIPFileIN" class="ink-form" style="width:50em;" enctype="multipart/form-data">
 <label for="fileIN" >File PIN History:&nbsp;&nbsp;&nbsp;</label>
 <div class="control-group column-group">
@@ -13,7 +15,20 @@
 </div><input id="fileINHidden" type="file" style="visibility:hidden" onchange="pinGenVIPInputBrowseFileINChange()" accept=".csv"/>
 </form>
 
-<form id="formPinGenVIP" class="ink-form">      
+ 
+<form id="formPinGenVIP" class="ink-form" enctype="multipart/form-data">
+
+<!-- 
+<label for="fileIN" >File PIN History:&nbsp;&nbsp;&nbsp;</label>
+<div class="control-group column-group">
+<div class="control append-button">
+<span><input id="fileIN" name="fileIN" style="width:15em;" type="text"></span>
+<input id="buttonBrowseFileIN" type="button" value="Browse" class="ink-button green" onclick="pinGenVIPButtonBrowseFileINClick();">
+</div>
+<div id="pinpinSearchSpin" class="align-right" style="font-size:1.6em;margin-top:-.3em;margin-left:.8em"></div>
+</div><input id="fileINHidden" type="file" style="visibility:hidden" onchange="pinGenVIPInputBrowseFileINChange()" accept=".csv"/>
+ -->
+ 
 <div id="formPinGenVIPPins" class="control-group">
 	<label for="pin">VIP Pin:</label><i id="pinGenVIPPlus" class="fa fa-plus-square" style="font-size:1.3em;color:green;margin-top:-.3em;margin-left:8.1em;cursor:pointer;cursor:hand;" onclick="pinGenVIPButtonPlusClick(5)"></i>
 	<div class="control"><input id="pinCount" name="pinCount" style="width:15em;" type="hidden" value="5"></div>
@@ -49,12 +64,13 @@
 <i id="pinGenVIPPlus" class="fa fa-plus-square" style="font-size:1.3em;color:green;margin-top:-.3em;margin-left:10.8em;cursor:pointer;cursor:hand;" onclick="pinGenVIPButtonPlusClick(5)"></i>
 </div>
 
+<br/>
 	<div id="pinGenVIPButton">
         <input id="buttonCAM" type="button" value="Compare and Map VIP PINs" class="ink-button green" onclick="pinGenVIPButtonCAMClick()">
 		<input id="buttonCancel" type="button" value="Cancel" class="ink-button red" onclick="goHome()">
 	</div>
 <br/><br/>
-		</form>
+</form>
 		
 		
 		
