@@ -170,6 +170,18 @@ Ink.log("result: " + result);goHome();
 	});
 }
 
+function menuManagePattern() {
+	Ink.requireModules(['Ink.Net.Ajax_1','Ink.Dom.Element_1'], function(Ajax,InkElement) {
+		var container = Ink.i('main-panel');
+		Ajax.load('manage-pattern.html', function (res) {
+		    InkElement.setHTML(container,res);
+		});
+		Ajax.load('SerialMapPatternDropdown', function (res) {
+	    	InkElement.setHTML(Ink.i('serialPattern'),res);
+		});
+	});
+}
+
 function addSep(nStr) {
     nStr += '';
     x = nStr.split('.');
@@ -999,4 +1011,8 @@ Ink.log("result: " + result);
 
 function pinHistoryButtonSearchClick() {
 	
+}
+
+function managePatternButtonPlusClick() {
+
 }
