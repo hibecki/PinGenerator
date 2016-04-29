@@ -3,21 +3,39 @@
     <ul class="stage column-group">
         <li class="slide all-100">
         <div id="serialMapAlert"></div>
+        
+<form id="formSerialMapFileIN" class="ink-form" style="width:50em;" enctype="multipart/form-data">
+
+<div class="control-group column-group required">
+<label for="fileIN" >File PIN History:</label>
+</div>
+<div class="control-group column-group required">
+<div class="control append-button">
+<span><input id="fileIN" name="fileIN" style="width:15em;" type="text"></span>
+<input id="buttonBrowseFileIN" type="button" value="Browse" class="ink-button green" onclick="pinGenVIPButtonBrowseFileINClick();">
+</div>
+<div id="pinpinSearchSpin" class="align-right" style="font-size:1.6em;margin-top:-.3em;margin-left:.8em"></div>
+</div>
+<input id="fileINHidden" type="file" style="visibility:hidden" onchange="pinGenVIPInputBrowseFileINChange()" accept=".csv"/>
+</form>        
+        
 <form id="formSerialMap" class="ink-form">
 <div class="control-group required">
-	<label for="serialPattern">Pattern:</label>
+	<label for="serialPattern">Voucher Template Name:</label>
 	<div class="control">
 
 	<select id="serialPattern" name="serialPattern" style="width:15em;"></select>
 	<!--  <input id="pinDigit" name="pinDigit" type="number" style="width:15em;" min="1" max="15" placeholder="pinDigit" value="12">  -->
 	</div>
 </div>
+<!-- <div class="control-group required validation error"> -->
 <div class="control-group required">
 	<label for="pinAmount">Pin Amount:</label>
 	<div class="control">
-	    <input id="pinAmount" name="pinAmount" class="ink-fv-required ink-fv-number" style="width:15em;" type="text" placeholder="Pin Amount" maxlength="7" onkeypress='return ((event.charCode >= 48 && event.charCode <= 57) || (event.charCode == 188))' >
+	    <input id="pinAmount" name="pinAmount" class="ink-fv-required ink-fv-number ink-fv-custom nomore25000" style="width:15em;" type="text" placeholder="Pin Amount" maxlength="5" onkeypress='return ((event.charCode >= 48 && event.charCode <= 57) || (event.charCode == 188))' >
 	</div>
-</div>
+<!-- <p class="tip">Your field has errors</p> -->
+</div><br/>
 	<input id="buttonMap" type="button" value="&nbsp;&nbsp;&nbsp;Map&nbsp;&nbsp;&nbsp;" class="ink-button green" onclick="serialMapButtonMapClick();">
 	<input id="buttonCancel" type="button" value="Cancel" class="ink-button red" onclick="goHome()">
 </form>

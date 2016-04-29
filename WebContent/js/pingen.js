@@ -808,12 +808,20 @@ function serialMapButtonMapClick() {
 	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Modal_1','Ink.UI.FormValidator_1'], function(Ajax,FormSerialize,InkElement,Modal,FormValidator) {
 	    var form = Ink.i('formSerialMap');
 	    var pat = Ink.i('serialPattern');
-        if (FormValidator.validate(form)) {
+	    var foundFileIN = false;
+	    var inputBrowse = Ink.i('fileINHidden');
+	    var file = inputBrowse.files[0];
+	    if (!file) {
+			var alert = '<div class="ink-alert block" role="alert"><button class="ink-dismiss">&times;</button><h4>Missing file PIN history!</h4>';
+			alert += '<p>Please browse for file PIN history to compare with VIP PINs</p></div>';
+			InkElement.setHTML(Ink.i('serialMapAlert'),alert);
+	    }
+        if (FormValidator.validate(form,{customFlag:[{flag:'nomore25000',msg:'Max Pin Amount: 25,000',callback:function(el){return parseInt(el.value, 10) <= 25000;}}]}) && file) {
             var formData = FormSerialize.serialize(form);
-            InkElement.setHTML(Ink.i('serialMapPatternConfirm'),'Pattern: <b style="color:red">' + pat.options[pat.selectedIndex].text + '</b>');
+            InkElement.setHTML(Ink.i('serialMapPatternConfirm'),'Voucher Template Name: <b style="color:red">' + pat.options[pat.selectedIndex].text + '</b>');
     		InkElement.setHTML(Ink.i('serialMapPinAmountConfirm'),'Pin Amount: <b style="color:red">' + formData.pinAmount + '</b>');
     		if (typeof modalSerialMap == "undefined") {modalSerialMap = new Modal('#formSerialMapConfirm');}
-    		modalSerialMap.open(); 
+    		modalSerialMap.open();
         }
 	});
 }

@@ -5,14 +5,18 @@
 
 
 <form id="formPinGenVIPFileIN" class="ink-form" style="width:50em;" enctype="multipart/form-data">
-<label for="fileIN" >File PIN History:&nbsp;&nbsp;&nbsp;</label>
+
+<div class="control-group column-group required">
+<label for="fileIN" >File PIN History:</label>
+</div>
 <div class="control-group column-group">
 <div class="control append-button">
 <span><input id="fileIN" name="fileIN" style="width:15em;" type="text"></span>
 <input id="buttonBrowseFileIN" type="button" value="Browse" class="ink-button green" onclick="pinGenVIPButtonBrowseFileINClick();">
 </div>
 <div id="pinpinSearchSpin" class="align-right" style="font-size:1.6em;margin-top:-.3em;margin-left:.8em"></div>
-</div><input id="fileINHidden" type="file" style="visibility:hidden" onchange="pinGenVIPInputBrowseFileINChange()" accept=".csv"/>
+</div>
+<input id="fileINHidden" type="file" style="visibility:hidden" onchange="pinGenVIPInputBrowseFileINChange()" accept=".csv"/>
 </form>
 
  
