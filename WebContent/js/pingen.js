@@ -173,11 +173,14 @@ Ink.log("result: " + result);goHome();
 function menuManagePattern() {
 	Ink.requireModules(['Ink.Net.Ajax_1','Ink.Dom.Element_1'], function(Ajax,InkElement) {
 		var container = Ink.i('main-panel');
+		crs = (function () { return; })(); modalManagePattern = (function () { return; })();
+	
 		Ajax.load('manage-pattern.html', function (res) {
 		    InkElement.setHTML(container,res);
 		});
-		Ajax.load('SerialMapPatternDropdown', function (res) {
-	    	InkElement.setHTML(Ink.i('serialPattern'),res);
+		
+		Ajax.load('PatternTable', function (res) {
+	    	InkElement.setHTML(Ink.i('tbodyPattern'),res);
 		});
 	});
 }
@@ -854,7 +857,7 @@ Ink.log("result: " + result);Ink.log("count: " + count);
 										if(result==="succeed"){
 											var crs = new Carousel('#serialMapCarousel');crs.nextPage();
 											InkElement.setHTML(Ink.i('serialMapJobId'),'Job ID: <b style="color:red">' + jobId + '</b>');
-											var probar = probar = new ProgressBar('#serialMapProgressBar');
+											var probar = new ProgressBar('#serialMapProgressBar');
 											setTimeout(function(){serialMapUpdateProgress(probar,jobId,pinAmount);},2000);
 										}
 						            }
@@ -1022,5 +1025,121 @@ function pinHistoryButtonSearchClick() {
 }
 
 function managePatternButtonPlusClick() {
+	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Carousel_1','Ink.UI.ProgressBar_1','Ink.Dom.Event_1'], function(Ajax,FormSerialize,InkElement,Carousel,ProgressBar,InkEvent) {
+		if (typeof crs == "undefined") {crs = new Carousel('#managePatternCarousel');}
+		crs.nextPage();
+		Ink.i('formManagePattern').reset();
+		
+		
+		Ink.i('buttonUpdate').value = "   Add new   ";
+		InkEvent.on(Ink.i('buttonUpdate'), 'click', managePatternEditAddClick);
+		InkElement.setHTML(Ink.i('managePatternEditHead'),'Add new pattern');
+		Ink.i('channelName').value = '';
+		Ink.i('channelCode').value = '';
+		Ink.i('channelDigit').value = '';
+		Ink.i('pinDigit').value = '';
+	});
+}
 
+function managePatternDeleteClick(PATTERNID) {
+	alert('delete ' + PATTERNID);
+}
+
+function managePatternEditClick(PATTERNID) {
+	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Carousel_1','Ink.UI.ProgressBar_1','Ink.Dom.Event_1'], function(Ajax,FormSerialize,InkElement,Carousel,ProgressBar,InkEvent) {
+		if (typeof crs == "undefined") {crs = new Carousel('#managePatternCarousel');}
+		crs.nextPage();
+		Ink.i('buttonUpdate').value = "   Save   "
+		InkEvent.on(Ink.i('buttonUpdate'), 'click', managePatternEditSaveClick);
+		InkElement.setHTML(Ink.i('managePatternEditHead'),'Edit pattern');
+		var uri = window.url_home + '/PatternGetById?patternId='+PATTERNID;
+	    new Ajax(uri, {
+	        method: 'GET',
+	        onSuccess: function(obj) {
+	            if(obj && obj.responseJSON) {
+	            	var result = obj.responseJSON['result'];
+	            	var PATTERNID= obj.responseJSON['PATTERNID'];
+	            	var CHANNEL = obj.responseJSON['CHANNEL'];
+	            	var CHANNELCODE = obj.responseJSON['CHANNELCODE'];
+	            	var DIGIT = obj.responseJSON['DIGIT'];
+	            	var PINDIGIT = obj.responseJSON['PINDIGIT'];            	
+Ink.log("result: " + result);Ink.log("CHANNEL: " + CHANNEL);
+					if(result==="succeed"){
+						Ink.i('patternId').value = PATTERNID;
+						Ink.i('channelName').value = CHANNEL;
+						Ink.i('channelCode').value = CHANNELCODE;
+						Ink.i('channelDigit').value = DIGIT;
+						Ink.i('pinDigit').value = PINDIGIT;
+					}
+				}
+            }, 
+            onFailure: function() {result="failed on network!";
+Ink.log("result: " + result);
+            }
+	    });
+	});
+}
+
+function managePatternEditAddClick() {
+	Ink.requireModules(['Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Modal_1','Ink.UI.FormValidator_1'], function(FormSerialize,InkElement,Modal,FormValidator) {
+	    var form = Ink.i('formManagePattern');
+        if (FormValidator.validate(form)) {
+            var formData = FormSerialize.serialize(form);
+            
+			InkElement.setHTML(Ink.i('ManagePatternConfirmChannel'),'Channel: <b style="color:red">' + formData.channelName + '</b>');
+			InkElement.setHTML(Ink.i('ManagePatternConfirmChannelCode'),'Channel code: <b style="color:red">' + formData.channelCode + '</b>,   Channel digit: <b style="color:red">' + formData.channelDigit + '</b>');
+			InkElement.setHTML(Ink.i('ManagePatternConfirmPinDigit'),'Pin digit: <b style="color:red">' + formData.pinDigit + '</b>');
+			if (typeof modalManagePattern == "undefined") {modalManagePattern = new Modal('#formManagePatternConfirm');}
+			modalManagePattern.open(); 
+        }
+	});
+}
+
+function managePatternEditSaveClick() {
+	Ink.requireModules(['Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Modal_1','Ink.UI.FormValidator_1'], function(FormSerialize,InkElement,Modal,FormValidator) {
+	    var form = Ink.i('formManagePattern');
+        if (FormValidator.validate(form)) {
+            var formData = FormSerialize.serialize(form);
+            
+			InkElement.setHTML(Ink.i('ManagePatternConfirmChannel'),'Channel: <b style="color:red">' + formData.channelName + '</b>');
+			InkElement.setHTML(Ink.i('ManagePatternConfirmChannelCode'),'Channel code: <b style="color:red">' + formData.channelCode + '</b>,   Channel digit: <b style="color:red">' + formData.channelDigit + '</b>');
+			InkElement.setHTML(Ink.i('ManagePatternConfirmPinDigit'),'Pin digit: <b style="color:red">' + formData.pinDigit + '</b>');
+			if (typeof modalManagePattern == "undefined") {modalManagePattern = new Modal('#formManagePatternConfirm');}
+			modalManagePattern.open(); 
+        }
+	});
+}
+
+function managePatternEditSaveConfirmClick() {
+	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Modal_1','Ink.UI.FormValidator_1'], function(Ajax,FormSerialize,InkElement,Modal,FormValidator) {
+	    var form = Ink.i('formManagePattern');
+        var formData = FormSerialize.serialize(form);
+            
+        Ink.i('channelName').disabled = true;
+
+		var uri = window.url_home + '/PatternUpdate';
+	    new Ajax(uri, {
+	        method: 'POST',
+	        postBody: formData,
+	        onSuccess: function(obj) {
+	            if(obj && obj.responseJSON) {
+	            	var result = obj.responseJSON['result'];
+Ink.log("result: " + result);
+					if(result==="succeed"){
+						menuManagePattern();
+					}
+	            }
+	        }, 
+	        onFailure: function() {result="failed on network!"
+Ink.log("result: " + result);
+	        }
+	    });
+	});
+}
+
+function managePatternEditGoBack() {
+	Ink.requireModules(['Ink.UI.Carousel_1'], function(Carousel) {
+		if (typeof crs == "undefined") {crs = new Carousel('#managePatternCarousel');}
+		crs.setPage(1);crs.previousPage();
+	});
 }
