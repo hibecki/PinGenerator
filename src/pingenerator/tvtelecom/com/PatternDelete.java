@@ -20,11 +20,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-@WebServlet("/PatternAdd")
-public class PatternAdd extends HttpServlet {
+@WebServlet("/PatternDelete")
+public class PatternDelete extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-
-    public PatternAdd() {
+       
+    public PatternDelete() {
         super();
     }
 
@@ -46,7 +46,7 @@ LOG.log(Level.INFO,"userId:{0} channelName:{1} channelCode:{2} channelDigit:{3} 
 		Connection con = null;
 		Statement st = null;
 		ResultSet rs = null;
-		String sql = "insert into pattern (channel,channelCode,digit,pinDigit,updatedby,updateddate) values ('"+channelName+"','"+channelCode+"',"+channelDigit+","+pinDigit+","+userId+",CURRENT_TIMESTAMP)";
+		String sql = "delete from pattern where patternid = " + patternId;
 		String result="failed";
 
 		
@@ -76,7 +76,7 @@ LOG.log(Level.WARNING, ex.getMessage(), ex);
 		response.setContentType("application/json");
 		response.setCharacterEncoding(Utils.CharacterEncoding);
 		PrintWriter out = response.getWriter();
-		out.print("{\"result\":\""+result+"\",\"channel\":\""+channelName+"\"}");
+		out.print("{\"result\":\""+result+"\",\"channel\":"+channelName+"}");
 		out.flush();
 	}
 

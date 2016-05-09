@@ -50,7 +50,7 @@
 </div><br/>
 	<input id="buttonUpdate" type="button" value="&nbsp;&nbsp;&nbsp;Add new&nbsp;&nbsp;&nbsp;" class="ink-button green" onclick="managePatternEditAddClick();">
 	<input id="buttonCancel" type="button" value="Cancel" class="ink-button red" onclick="managePatternEditGoBack()">
-</form>
+</form><br/>
         </li>
     </ul>
 </div>
@@ -60,16 +60,16 @@
             <!-- <button class="modal-close ink-dismiss"></button>  -->
             <h2 id="modal-title">Manage / Pattern</h2>
         </div>
-        <div class="modal-body" id="modalContent">
+        <div class="modal-body" id="modalContent"><div id="confirmMode" style="display:none;"></div><div id="confirmPatternId" style="display:none;"></div>
             <h3>Please confirm</h3>
             <div id="ManagePatternConfirmChannel"></div>
             <div id="ManagePatternConfirmChannelCode"></div>
             <div id="ManagePatternConfirmPinDigit"></div><br/>
-            Do you really want to save pattern?
+            <div id="ManagePatternConfirmMSG">Do you really want to save pattern?</div>
         </div><br/>
         <div class="modal-footer">
-        	<div class="push-left"><button class="ink-button ink-dismiss green" onclick="managePatternEditSaveConfirmClick()">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Yes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</button></div>
-            <div class="push-right"><button class="ink-button ink-dismiss red">&nbsp;&nbsp;&nbsp;Cancel&nbsp;&nbsp;&nbsp;</button></div>
+        	<div class="push-left"><button id="buttonConfirm" class="ink-button ink-dismiss" onclick="managePatternConfirmClick()"></button></div>
+            <div class="push-right"><button class="ink-button ink-dismiss">&nbsp;&nbsp;&nbsp;Cancel&nbsp;&nbsp;&nbsp;</button></div>
         </div>
     </div>
 </div>

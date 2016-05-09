@@ -807,6 +807,20 @@ function loadPinInputBrowseFileINChange() {
 	});
 }
 
+function serialMapBrowseFileINClick() {
+	Ink.requireModules(['Ink.Dom.Element_1'], function(InkElement) {
+	    var inputBrowse = Ink.i('fileINHidden');
+	    inputBrowse.click();
+	});
+}
+function serialMapBrowseFileINChange() {
+	Ink.requireModules(['Ink.Dom.Element_1'], function(InkElement) {
+	    var inputBrowse = Ink.i('fileINHidden');
+	    var fileIN = Ink.i('fileIN');
+	    var file = inputBrowse.files[0];
+        if ('name' in file) {fileIN.value = file.name;}
+	});
+}
 function serialMapButtonMapClick() {
 	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Modal_1','Ink.UI.FormValidator_1'], function(Ajax,FormSerialize,InkElement,Modal,FormValidator) {
 	    var form = Ink.i('formSerialMap');
@@ -818,6 +832,8 @@ function serialMapButtonMapClick() {
 			var alert = '<div class="ink-alert block" role="alert"><button class="ink-dismiss">&times;</button><h4>Missing file PIN history!</h4>';
 			alert += '<p>Please browse for file PIN history to compare with VIP PINs</p></div>';
 			InkElement.setHTML(Ink.i('serialMapAlert'),alert);
+	    } else {
+	    	InkElement.setHTML(Ink.i('serialMapAlert'),'');
 	    }
         if (FormValidator.validate(form,{customFlag:[{flag:'nomore25000',msg:'Max Pin Amount: 25,000',callback:function(el){return parseInt(el.value, 10) <= 25000;}}]}) && file) {
             var formData = FormSerialize.serialize(form);
@@ -1024,12 +1040,17 @@ function pinHistoryButtonSearchClick() {
 	
 }
 
+
+
 function managePatternButtonPlusClick() {
 	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Carousel_1','Ink.UI.ProgressBar_1','Ink.Dom.Event_1'], function(Ajax,FormSerialize,InkElement,Carousel,ProgressBar,InkEvent) {
 		if (typeof crs == "undefined") {crs = new Carousel('#managePatternCarousel');}
 		crs.nextPage();
-		Ink.i('formManagePattern').reset();
-		
+
+		InkElement.setHTML(Ink.i('confirmMode'),'add');
+		Ink.i('buttonConfirm').className += " green";
+		Ink.i('buttonConfirm').innerHTML = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Yes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+		Ink.i('ManagePatternConfirmMSG').innerHTML = "Do you really want to add new pattern?";
 		
 		Ink.i('buttonUpdate').value = "   Add new   ";
 		InkEvent.on(Ink.i('buttonUpdate'), 'click', managePatternEditAddClick);
@@ -1042,14 +1063,52 @@ function managePatternButtonPlusClick() {
 }
 
 function managePatternDeleteClick(PATTERNID) {
-	alert('delete ' + PATTERNID);
+	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Carousel_1','Ink.UI.ProgressBar_1','Ink.Dom.Event_1','Ink.UI.Modal_1'], function(Ajax,FormSerialize,InkElement,Carousel,ProgressBar,InkEvent,Modal) {
+		var uri = window.url_home + '/PatternGetById?patternId='+PATTERNID;
+	    new Ajax(uri, {
+	        method: 'GET',
+	        onSuccess: function(obj) {
+	            if(obj && obj.responseJSON) {
+	            	var result = obj.responseJSON['result'];
+	            	var PATTERNID= obj.responseJSON['PATTERNID'];
+	            	var CHANNEL = obj.responseJSON['CHANNEL'];
+	            	var CHANNELCODE = obj.responseJSON['CHANNELCODE'];
+	            	var DIGIT = obj.responseJSON['DIGIT'];
+	            	var PINDIGIT = obj.responseJSON['PINDIGIT'];            	
+Ink.log("result: " + result);Ink.log("CHANNEL: " + CHANNEL);
+					if(result==="succeed"){
+						InkElement.setHTML(Ink.i('ManagePatternConfirmChannel'),'Channel: <b style="color:red">' + CHANNEL + '</b>');
+						InkElement.setHTML(Ink.i('ManagePatternConfirmChannelCode'),'Channel code: <b style="color:red">' + CHANNELCODE + '</b>,   Channel digit: <b style="color:red">' + DIGIT + '</b>');
+						InkElement.setHTML(Ink.i('ManagePatternConfirmPinDigit'),'Pin digit: <b style="color:red">' + PINDIGIT + '</b>');
+						InkElement.setHTML(Ink.i('confirmMode'),'delete');
+						InkElement.setHTML(Ink.i('confirmPatternId'),PATTERNID);
+						Ink.i('buttonConfirm').className += " red";
+						Ink.i('buttonConfirm').innerHTML = "&nbsp;&nbsp;&nbsp;Delete&nbsp;&nbsp;&nbsp;";
+						Ink.i('ManagePatternConfirmMSG').innerHTML = "Do you really want to <b style='color:red'>DELETE</b>?";
+						if (typeof modalManagePattern == "undefined") {modalManagePattern = new Modal('#formManagePatternConfirm');}
+						modalManagePattern.open(); 
+					}
+				}
+            }, 
+            onFailure: function() {result="failed on network!";
+Ink.log("result: " + result);
+            }
+	    });
+	});
 }
 
 function managePatternEditClick(PATTERNID) {
 	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Carousel_1','Ink.UI.ProgressBar_1','Ink.Dom.Event_1'], function(Ajax,FormSerialize,InkElement,Carousel,ProgressBar,InkEvent) {
 		if (typeof crs == "undefined") {crs = new Carousel('#managePatternCarousel');}
 		crs.nextPage();
-		Ink.i('buttonUpdate').value = "   Save   "
+		
+		InkElement.setHTML(Ink.i('confirmMode'),'edit');
+		InkElement.setHTML(Ink.i('confirmPatternId'),PATTERNID);
+		Ink.i('buttonConfirm').className += " green";
+		Ink.i('buttonConfirm').innerHTML = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Yes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+		Ink.i('ManagePatternConfirmMSG').innerHTML = "Do you really want to save pattern?";
+		
+		Ink.i('buttonUpdate').value = '      Save      ';
 		InkEvent.on(Ink.i('buttonUpdate'), 'click', managePatternEditSaveClick);
 		InkElement.setHTML(Ink.i('managePatternEditHead'),'Edit pattern');
 		var uri = window.url_home + '/PatternGetById?patternId='+PATTERNID;
@@ -1110,30 +1169,53 @@ function managePatternEditSaveClick() {
 	});
 }
 
-function managePatternEditSaveConfirmClick() {
+function managePatternConfirmClick() {
 	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Modal_1','Ink.UI.FormValidator_1'], function(Ajax,FormSerialize,InkElement,Modal,FormValidator) {
-	    var form = Ink.i('formManagePattern');
-        var formData = FormSerialize.serialize(form);
-            
-        Ink.i('channelName').disabled = true;
-
-		var uri = window.url_home + '/PatternUpdate';
-	    new Ajax(uri, {
-	        method: 'POST',
-	        postBody: formData,
-	        onSuccess: function(obj) {
-	            if(obj && obj.responseJSON) {
-	            	var result = obj.responseJSON['result'];
-Ink.log("result: " + result);
-					if(result==="succeed"){
-						menuManagePattern();
-					}
-	            }
-	        }, 
-	        onFailure: function() {result="failed on network!"
-Ink.log("result: " + result);
+		var confirmMode = Ink.i('confirmMode').innerHTML;
+		var uri = '';
+		if (confirmMode != 'delete') {
+			var form = Ink.i('formManagePattern');
+	        var formData = FormSerialize.serialize(form);
+	        Ink.i('channelName').disabled = true;
+	        if (confirmMode != 'edit') {
+	        	uri = window.url_home + '/PatternAdd';
+	        } else {
+	        	uri = window.url_home + '/PatternUpdate';
 	        }
-	    });
+		    new Ajax(uri, {
+		        method: 'POST',
+		        postBody: formData,
+		        onSuccess: function(obj) {
+		            if(obj && obj.responseJSON) {
+		            	var result = obj.responseJSON['result'];
+	Ink.log("result: " + result);
+						if(result==="succeed"){
+							menuManagePattern();
+						}
+		            }
+		        }, 
+		        onFailure: function() {result="failed on network!"
+	Ink.log("result: " + result);
+		        }
+		    });
+		} else {
+			uri = window.url_home + '/PatternDelete?patternId=' + InkElement.textContent('confirmPatternId');
+		    new Ajax(uri, {
+		        method: 'GET',
+		        onSuccess: function(obj) {
+		            if(obj && obj.responseJSON) {
+		            	var result = obj.responseJSON['result'];
+	Ink.log("result: " + result);
+						if(result==="succeed"){
+							menuManagePattern();
+						}
+		            }
+		        }, 
+		        onFailure: function() {result="failed on network!"
+	Ink.log("result: " + result);
+		        }
+		    });
+		}
 	});
 }
 
