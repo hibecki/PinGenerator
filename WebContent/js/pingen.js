@@ -853,8 +853,9 @@ function serialMapButtonConfirmClick() {
 		var form = Ink.i('formSerialMap');
 	    var formData = FormSerialize.serialize(form);
 	    var pinAmount = formData.pinAmount;
+	    var serialPattern = formData.serialPattern;
 	    
-	    var uri = window.url_home + '/PinCountA?patternid=' + formData.serialPattern;
+	    var uri = window.url_home + '/PinCountA?patternid=' + serialPattern;
 	    new Ajax(uri, {
 	        method: 'GET',
 	        onSuccess: function(obj) {
@@ -864,16 +865,33 @@ Ink.log("result: " + result);Ink.log("count: " + count);
 					if(result==="succeed"){
 						if (count >= pinAmount) {
 						    Ink.i('serialPattern').disabled = true;Ink.i('pinAmount').disabled = true;
-						    Ink.i('buttonMap').disabled = true;Ink.i('buttonCancel').disabled = true;
-						    var uri = window.url_home + '/SerialMap2Upload';
-						    new Ajax(uri, {
-						        method: 'POST',
-						        postBody: formFileData,
-						        onSuccess: function(obj) {
-						            if(obj && obj.responseJSON) {
-						            	var result = obj.responseJSON['result'];var jobId = obj.responseJSON['jobId'];
-	Ink.log("result: " + result);Ink.log("jobId: " + jobId);
+						    Ink.i('buttonMap').disabled = true; //Ink.i('buttonCancel').disabled = true;
+
+						    var fileIN = Ink.i('fileINHidden');
+						    var data = new FormData();
+						    data.append('fileINHidden', fileIN.files[0]);
+						    Ink.i('buttonBrowseFileIN').disabled = true;Ink.i('fileIN').disabled = true;
+						    
+						    Ink.i('upBar').style.display = "inline";
+							var upbar = new ProgressBar('#serialMapUploadProgressBar');
+						    var request = new XMLHttpRequest();
+						    request.onreadystatechange = function(){
+						        if(request.readyState == 4){
+						            try {
+						                var resp = JSON.parse(request.response);
+						            	var result = resp.result;var jobId = resp.jobId;
+Ink.log("result: " + result);Ink.log("jobId: " + jobId);
 										if(result==="succeed"){
+										    uri = window.url_home + '/SerialMap2?jobId=' + jobId + '&serialPattern='+serialPattern + '&pinAmount='+pinAmount;
+										    new Ajax(uri, {
+										        method: 'GET',
+										        onSuccess: function(obj) {
+										            if(obj && obj.responseJSON) {
+										            	var result = obj.responseJSON['result'];
+									Ink.log("result: " + result);
+														if(result==="succeed"){
+											
+											
 											
 											
 											
@@ -881,13 +899,34 @@ Ink.log("result: " + result);Ink.log("count: " + count);
 											InkElement.setHTML(Ink.i('serialMapJobId'),'Job ID: <b style="color:red">' + jobId + '</b>');
 											var probar = new ProgressBar('#serialMapProgressBar');
 											setTimeout(function(){serialMapUpdateProgress(probar,jobId,pinAmount);},2000);
+														}
+										            }
+										        }, 
+										        onFailure: function() {result="failed on network!";
+Ink.log("result: " + result);
+										        }
+										    });
 										}
+						            } catch (e){
+						                var resp = {
+						                    result: 'failed on network!',
+						                    fileName: 'Unknown error occurred: [' + request.responseText + ']'
+						                };
 						            }
-						        }, 
-						        onFailure: function() {result="failed on network!"
-	Ink.log("result: " + result);
+						            console.log(resp.result + ': ' + resp.fileName);
 						        }
-						    });
+						    };
+
+						    request.upload.addEventListener('progress', function(e){
+						    	upbar.setValue(Math.ceil(e.loaded/e.total) * 100);
+						    	//if (e.loaded == e.total) {comparePinProgress(fileIN.files[0]);}
+						    }, false);
+
+						    //var crs = new Carousel('#pinCompareCarousel');crs.nextPage();
+						    
+						    request.open('POST', window.url_home + '/SerialMap2Upload');
+						    request.send(data);
+						    
 						} else {
 							var alert = '<div class="ink-alert block" role="alert"><button class="ink-dismiss">&times;</button><h4>PIN is not enough!</h4>';
 							alert += '<p>The amount of available PIN in stock is not enough for mapping process<br/>Please generate more PIN before execute further.</p></div>';
@@ -896,7 +935,7 @@ Ink.log("result: " + result);Ink.log("count: " + count);
 					}
 	            }
 	        }, 
-	        onFailure: function() {result="failed on network!"
+	        onFailure: function() {result="failed on network!";
 Ink.log("result: " + result);
 	        }
 	    });

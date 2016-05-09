@@ -14,11 +14,17 @@
 <span><input id="fileIN" name="fileIN" style="width:15em;" type="text"></span>
 <input id="buttonBrowseFileIN" type="button" value="Browse" class="ink-button green" onclick="serialMapBrowseFileINClick();">
 </div>
-<div id="pinpinSearchSpin" class="align-right" style="font-size:1.6em;margin-top:-.3em;margin-left:.8em"></div>
+<div id="upBar" style="display:none">
+<div id="serialMapUploadProgressBar" class="ink-progress-bar" data-start-value="0" style="position:relative;left:30px;top:10px;width:200px;">
+	<span id="serialMapUploadProgressBarCaption" class="caption"><i class="fa fa-cog fa-spin"></i>&nbsp;&nbsp;Uploading...</span><div class="bar green"></div>
 </div>
+</div>
+
+</div>
+
 <input id="fileINHidden" type="file" style="visibility:hidden" onchange="serialMapBrowseFileINChange()" accept=".csv"/>
-</form>        
-        
+</form>    
+
 <form id="formSerialMap" class="ink-form">
 <div class="control-group required">
 	<label for="serialPattern">Voucher Template Name:</label>

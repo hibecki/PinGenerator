@@ -9,8 +9,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,7 +33,8 @@ public class SerialMap2 extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Logger LOG = Logger.getLogger(SerialMap2.class.getName());
-        request.setCharacterEncoding(Utils.CharacterEncoding);       
+        request.setCharacterEncoding(Utils.CharacterEncoding);
+        String jobId = request.getParameter("jobId");
         String serialPattern = request.getParameter("serialPattern");
         String pinAmount = request.getParameter("pinAmount");
 
@@ -43,8 +42,8 @@ public class SerialMap2 extends HttpServlet {
 			HttpSession session = request.getSession(false);
 			String userId = ((Integer)session.getAttribute("userId")).toString();
 			
-			SimpleDateFormat dFormat = new SimpleDateFormat("yyMMddhhmmss");
-			String jobId = dFormat.format(new Date());
+			//SimpleDateFormat dFormat = new SimpleDateFormat("yyMMddhhmmss");
+			//String jobId = dFormat.format(new Date());
 			
 	LOG.log(Level.INFO,"userId:{0} serialPattern:{1} pinAmount:{2} jobId:{3}",new Object[]{userId,serialPattern,pinAmount,jobId});
 
@@ -53,7 +52,7 @@ public class SerialMap2 extends HttpServlet {
 			Statement st = null;
 			ResultSet rs = null;
 			String sql0 = "SELECT * FROM PATTERN WHERE PATTERNID = "+serialPattern;
-			String sql = "insert into job (JOBID,TYPE,DIGIT,AMOUNT,PATTERNID,STATUS,UPDATEDBY,UPDATEDDATE) values ('" + jobId + "','SM',_DIGIT," + pinAmount + ","+serialPattern+",'I',"+ userId + ",CURRENT_TIMESTAMP)";
+			String sql = "update job set DIGIT = _DIGIT, AMOUNT = " + pinAmount + ", PATTERNID = "+serialPattern+", STATUS = 'P', UPDATEDBY = "+ userId + ", UPDATEDDATE = CURRENT_TIMESTAMP where jobId = '" + jobId + "'";
 			
 			String result="failed";
 			
@@ -91,13 +90,13 @@ public class SerialMap2 extends HttpServlet {
 			if (!result.equals("failed")) {
 				URLConnection urlcon;
 				try {
-					String urlString = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+Utils.appPath+"SerialMapX2?jobId="+jobId+"&userId="+userId;
-	LOG.log(Level.INFO,"SerialMap call SerialMapX2 url:{0}",new Object[]{urlString});
+					String urlString = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+Utils.appPath+"SerialMap2X?jobId="+jobId+"&userId="+userId;
+	LOG.log(Level.INFO,"SerialMap call SerialMap2X url:{0}",new Object[]{urlString});
 					URL url = new URL(urlString);
 					urlcon = url.openConnection();
 					urlcon.setConnectTimeout(100);
 					urlcon.setReadTimeout(100);
-	LOG.log(Level.INFO,"call SerialMapX2: {0}",new Object[]{urlcon.getDate()});
+	LOG.log(Level.INFO,"call SerialMap2X: {0}",new Object[]{urlcon.getDate()});
 				} catch (MalformedURLException e) { 
 					LOG.log(Level.SEVERE, e.getMessage(), e);
 					result = "failed";
