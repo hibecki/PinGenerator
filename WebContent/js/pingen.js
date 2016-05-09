@@ -847,7 +847,10 @@ function serialMapButtonMapClick() {
 
 function serialMapButtonConfirmClick() {
 	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Carousel_1','Ink.UI.ProgressBar_1'], function(Ajax,FormSerialize,InkElement,Carousel,ProgressBar) {
-	    var form = Ink.i('formSerialMap');
+	    var formFile = Ink.i('formSerialMapFileIN');
+	    var formFileData = FormSerialize.serialize(formFile);
+	    
+		var form = Ink.i('formSerialMap');
 	    var formData = FormSerialize.serialize(form);
 	    var pinAmount = formData.pinAmount;
 	    
@@ -862,15 +865,18 @@ Ink.log("result: " + result);Ink.log("count: " + count);
 						if (count >= pinAmount) {
 						    Ink.i('serialPattern').disabled = true;Ink.i('pinAmount').disabled = true;
 						    Ink.i('buttonMap').disabled = true;Ink.i('buttonCancel').disabled = true;
-						    var uri = window.url_home + '/SerialMap';
+						    var uri = window.url_home + '/SerialMap2Upload';
 						    new Ajax(uri, {
 						        method: 'POST',
-						        postBody: formData,
+						        postBody: formFileData,
 						        onSuccess: function(obj) {
 						            if(obj && obj.responseJSON) {
 						            	var result = obj.responseJSON['result'];var jobId = obj.responseJSON['jobId'];
 	Ink.log("result: " + result);Ink.log("jobId: " + jobId);
 										if(result==="succeed"){
+											
+											
+											
 											var crs = new Carousel('#serialMapCarousel');crs.nextPage();
 											InkElement.setHTML(Ink.i('serialMapJobId'),'Job ID: <b style="color:red">' + jobId + '</b>');
 											var probar = new ProgressBar('#serialMapProgressBar');

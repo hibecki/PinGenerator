@@ -91,12 +91,13 @@ LOG.log(Level.WARNING, ex.getMessage(), ex);
 		if (!result.equals("failed")) {
 			URLConnection urlcon;
 			try {
-LOG.log(Level.INFO,"SerialMap call SerialMapX url:{0}",new Object[]{request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+Utils.appPath+"SerialMapX?jobId="+jobId+"&userId="+userId});
-				URL url = new URL(request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+Utils.appPath+"SerialMapX?jobId="+jobId+"&userId="+userId);
+				String urlString = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+Utils.appPath+"SerialMapX2?jobId="+jobId+"&userId="+userId;
+LOG.log(Level.INFO,"SerialMap call SerialMapX2 url:{0}",new Object[]{urlString});
+				URL url = new URL(urlString);
 				urlcon = url.openConnection();
 				urlcon.setConnectTimeout(100);
 				urlcon.setReadTimeout(100);
-LOG.log(Level.INFO,"call SerialMapX: {0}",new Object[]{urlcon.getDate()});
+LOG.log(Level.INFO,"call SerialMapX2: {0}",new Object[]{urlcon.getDate()});
 			} catch (MalformedURLException e) { 
 				LOG.log(Level.SEVERE, e.getMessage(), e);
 				result = "failed";
