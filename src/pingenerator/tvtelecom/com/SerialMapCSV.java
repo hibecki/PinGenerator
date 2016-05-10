@@ -49,7 +49,7 @@ LOG.log(Level.INFO,"SerialMapCSV JobId:{0}",new Object[]{jobId});
 			st1 = con.createStatement();
 			rs1 = st1.executeQuery(sql1);
 			while (rs1.next()) {
-				result += rs1.getString("PIN")+","+rs1.getString("SERIAL")+"\r\n";
+				result += rs1.getString("SERIAL")+","+rs1.getString("PIN")+"\r\n";
 			}
 LOG.log(Level.INFO,"SerialMapCSV result:{0}",new Object[]{result});
 		} catch(NamingException | SQLException ex) {

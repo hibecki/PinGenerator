@@ -1,6 +1,9 @@
 package pingenerator.tvtelecom.com;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.LineNumberReader;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -39,31 +42,20 @@ LOG.log(Level.INFO,"SerialMap2X jobId:{0}",new Object[]{jobId});
 		Connection con = null;
 		Statement st1 = null;
 		String sql1 ="select * from job where status = 'P' and jobid = '" + jobId + "'";
+		String sql11 = "select * from pattern where patternid = _patternid";
+		String sql12 = "select * from pin where status = 'A' and serial is null and digit = _digit FETCH FIRST 1 ROWS ONLY";
 		ResultSet rs1 = null;
 		
-		Statement st11 = null;
-		String sql11 = "select * from pattern where patternid = _patternid";
-		ResultSet rs11 = null;
+		PreparedStatement st2 = null;
+		String sql2 = "update job set desc2 = ? where jobid = '" + jobId + "'";
 		
-		String sql12 = "update job set status = 'P' where jobid = '" + jobId + "'";
-		Statement st2 = null;
-		String sql2 = "update job set status = '_status', desc1 = '_desc1' where jobid = '" + jobId + "'";
-		String sql2r = "";
-		
-		Statement st3 = null;
-		String sql3 = "select count(pin) c from pin where status = 'A' and serial is null and digit = _digit";
-		//String sql31 = "select * from pin where status = 'A' and serial is null FETCH FIRST _amount ROWS ONLY";
-		String sql31 = "select * from pin where status = 'A' and serial is null and digit = _digit FETCH FIRST 1 ROWS ONLY";
-		ResultSet rs3 = null;
-		
-		Statement st4 = null;
-		String sql4 = "select max(serial) maxserial from pin where serial like '_channel%'";
-		//String sql4 = "insert into serial (SERIAL,PATTERNID,STATUS,JOBID,UPDATEDBY,UPDATEDDATE) values (?,_patternid,'A','"+jobId+"',"+userId+",CURRENT_TIMESTAMP)";
-		ResultSet rs4 = null;
-		
-		PreparedStatement st5 = null;
-		String sql5 = "update pin set serial = ?, status = 'M', jobid = '" + jobId + "', updatedby = "+userId+", updateddate = CURRENT_TIMESTAMP where pin = ?";
+		PreparedStatement st3 = null;
+		String sql3 = "update pin set serial = ?, status = 'M', jobid = '" + jobId + "', updatedby = "+userId+", updateddate = CURRENT_TIMESTAMP where pin = ?";
 
+		Statement st4 = null;
+		String sql4 = "update job set status = '_status', desc2 = '_desc2' where jobid = '" + jobId + "'";
+		String sql4r;
+		
 		String result="undefined";
 		try {
 			Context ctx = new InitialContext();
@@ -71,9 +63,9 @@ LOG.log(Level.INFO,"SerialMap2X jobId:{0}",new Object[]{jobId});
 			
 			int patternId;
 			long amount;
-			int pindigit;
+			String fileName;
 			
-			String channel;
+			String channelcode;
 			int digit;
 			int pinDigit;
 			
@@ -81,140 +73,107 @@ LOG.log(Level.INFO,"SerialMap2X jobId:{0}",new Object[]{jobId});
 			st1 = con.createStatement();
 			
 			rs1 = st1.executeQuery(sql1);
+            st4 = con.createStatement();
 			if (rs1.next()) {
 				patternId = rs1.getInt("PATTERNID");
 				amount = rs1.getLong("AMOUNT");
-				pindigit = rs1.getInt("DIGIT");
-				sql10 = sql10.replaceAll("_patternid", Integer.toString(patternId));
-LOG.log(Level.INFO,"SerialMapX sql10:{0}",new Object[]{sql10});
+				fileName = rs1.getString("DESC1");
+				
+				sql11 = sql11.replaceAll("_patternid", Integer.toString(patternId));
+LOG.log(Level.INFO,"SerialMap2X sql11:{0}",new Object[]{sql11});
 				rs1.close();
-				rs1 = st1.executeQuery(sql10);
-				if (!rs1.next()) {
-					sql11 = sql11.replaceAll("_patternid", Integer.toString(patternId));
-	LOG.log(Level.INFO,"SerialMapX sql11:{0}",new Object[]{sql11});
-					st11 = con.createStatement();
-					rs11 = st11.executeQuery(sql11);
-					if (rs11.next()) {
-						channel = rs11.getString("CHANNEL");
-						digit = rs11.getInt("DIGIT");
-						pinDigit = rs11.getInt("PINDIGIT");
-	LOG.log(Level.INFO,"SerialMapX channel:{0} digit:{1} pinDigit:{2}",new Object[]{channel,digit,pinDigit});
-						st1.executeUpdate(sql12);
-						
-			            sql2r = sql2.replaceAll("_status", "P");
-			            sql2r = sql2r.replaceAll("_desc1", "");
-						st2 = con.createStatement();
-						st2.executeUpdate(sql2r);
-	
-						st3 = con.createStatement();
-						sql3 = sql3.replaceAll("_digit", Integer.toString(pindigit));
-						rs3 = st3.executeQuery(sql3);
-						if (rs3.next()) {
-							long cAvailablePin = rs3.getLong("c");
-							if (cAvailablePin >= amount) {
-								sql4 = sql4.replaceAll("_channel", channel);
-	LOG.log(Level.INFO,"SerialMapX sql4:{0}",new Object[]{sql4});
-								String maxSerial = "9" + String.format("%0$" + digit + "d", 0).replace(' ', '0');
-LOG.log(Level.INFO,"SerialMapX maxSerial:{0}",new Object[]{maxSerial});
-								st4 = con.createStatement();
-								rs4 = st4.executeQuery(sql4);
-								if (rs4.next()) {
-									String res = rs4.getString("maxserial");
-									if (res != null) {maxSerial = res;maxSerial = "9" + maxSerial.substring(2);}
-LOG.log(Level.INFO,"SerialMapX maxSerial:{0}",new Object[]{maxSerial});
-								}
-								String pin = "";
-								long serial = Long.parseLong(maxSerial);
-LOG.log(Level.INFO,"SerialMapX serial:{0}",new Object[]{serial});
-LOG.log(Level.INFO,"SerialMapX sql5:{0}",new Object[]{sql5});
-								st5 = con.prepareStatement(sql5);
-								rs3.close();
-								sql31 = sql31.replaceAll("_digit", Integer.toString(pindigit));
-								for (int i = 1; i <= amount; i++) {
-									rs3 = st3.executeQuery(sql31);
-									while (rs3.next()) {
-										pin = rs3.getString("PIN");
-										serial++;
-										st5.setString(1, channel + Long.toString(serial).substring(1));
-										st5.setString(2, pin);
-										st5.executeUpdate();
-									}
-								}
-	
-								
-/**								
-	LOG.log(Level.INFO,"SerialMapX sql5:{0}",new Object[]{sql5});
-								st5 = con.prepareStatement(sql5);
-								boolean dup;
-								String pin = "";
-								String serial = "";					
-					            sql31 = sql31.replaceAll("_amount", Long.toString(amount));
-								rs3 = st3.executeQuery(sql31);
-	LOG.log(Level.INFO,"SerialMapX sql31:{0}",new Object[]{sql31});
-								while (rs3.next()) {
-									pin = rs3.getString("PIN");
-					                do {
-					                	dup = false;
-					                	try {
-					                		serial = channel+randomNumber(digit);
-					                		st4.setString(1, serial);
-					    					st4.executeUpdate();
-					                	} catch (java.sql.SQLIntegrityConstraintViolationException e) {
-	LOG.log(Level.INFO,"SerialMapX {0}",new Object[]{"found duplicated serial while generating: " + Long.toString(++c)});
-											dup = true;
-					                	}
-					                } while (dup);
-									st5.setString(1, serial);
-									st5.setString(2, pin);
-									st5.executeUpdate();
-								}
-								
-**/
-								
-								
-					            sql2r = sql2.replaceAll("_status", "S");
-					            sql2r = sql2r.replaceAll("_desc1", "");
-								st2.executeUpdate(sql2r);
-								result = "succeed";
-							} else {
-					            sql2r = sql2.replaceAll("_status", "F");
-					            sql2r = sql2r.replaceAll("_desc1", "Available PIN is not enough");
-								st2.executeUpdate(sql2r);
-								result = "failed";
-							}
+				rs1 = st1.executeQuery(sql11);
+				if (rs1.next()) {
+					channelcode = rs1.getString("CHANNELCODE");
+					digit = rs1.getInt("DIGIT");
+					pinDigit = rs1.getInt("PINDIGIT");
+LOG.log(Level.INFO,"SerialMap2X channelcode:{0} digit:{1} pinDigit:{2}",new Object[]{channelcode,digit,pinDigit});
+					
+					LineNumberReader lineNumberReader = new LineNumberReader(new FileReader(Utils.PathUpload + fileName));
+					lineNumberReader.skip(Long.MAX_VALUE);
+					int lineAmount = lineNumberReader.getLineNumber() + 1;
+					lineNumberReader.close();
+					
+					String serialString;
+					Long serial;Long maxSerial = 0L;
+					int count = 0;
+					try (BufferedReader br = new BufferedReader(new FileReader(Utils.PathUpload + fileName))) {
+						st2 = con.prepareStatement(sql2);
+						//Skip empty line
+					    for(String line; (line = br.readLine()) != null; ) {
+					    	if (!line.trim().isEmpty()) {
+					    		serialString = line.substring(0, line.indexOf(","));
+//LOG.log(Level.INFO,"SerialMap2X serial:{0}",new Object[]{serialString});
+    					        if (serialString.indexOf(channelcode) == 0) {
+    					        	serial = Long.parseLong(serialString);
+    					        	if (serial > maxSerial) { maxSerial = serial; }
+//LOG.log(Level.INFO,"SerialMap2X maxSerial:{0}",new Object[]{maxSerial});
+						        }
+    					        st2.setString(1, "F"+ lineAmount + "|" + ++count);
+    					        st2.executeUpdate();
+					    	}
+					    }
+					}
+
+					if (maxSerial == 0L) {
+						String maxSerialString = channelcode + String.format("%0$" + digit + "d", 0).replace(' ', '0');
+						maxSerial = Long.parseLong(maxSerialString.substring(0, digit));
+//LOG.log(Level.INFO,"SerialMap2X maxPattern:{0}",new Object[]{maxPattern});
+					}
+					maxSerial += 1;
+LOG.log(Level.INFO,"SerialMap2X maxPattern:{0}",new Object[]{maxSerial});
+					
+//LOG.log(Level.INFO,"SerialMap2X sql3:{0}",new Object[]{sql3});
+					st2 = con.prepareStatement(sql2);
+					st3 = con.prepareStatement(sql3);
+
+					sql12 = sql12.replaceAll("_digit", Integer.toString(pinDigit));
+					for (int i = 1; i <= amount; i++) {
+						rs1 = st1.executeQuery(sql12);
+						while (rs1.next()) {
+							st3.setString(1, maxSerial.toString());
+							st3.setString(2, rs1.getString("PIN"));
+							st3.executeUpdate();
+							maxSerial++;
+					        st2.setString(1, "M"+ amount + "|" + i);
+					        st2.executeUpdate();
 						}
 					}
-	LOG.log(Level.INFO,"SerialMapX Done!",new Object[]{});
+
+		            sql4r = sql4.replaceAll("_status", "S");
+		            sql4r = sql4r.replaceAll("_desc2", "");
+					st4.executeUpdate(sql4r);
+					result = "succeed";
 				} else {
-		            sql2r = sql2.replaceAll("_status", "F");
-		            sql2r = sql2r.replaceAll("_desc1", "There is another process generating serial number, please try again later.");
-		            st2 = con.createStatement();
-					st2.executeUpdate(sql2r);
+		            sql4r = sql4.replaceAll("_status", "F");
+		            sql4r = sql4r.replaceAll("_desc2", "");
+					st4.executeUpdate(sql4r);
 					result = "failed";
 				}
 			} else {
-	            sql2r = sql2.replaceAll("_status", "F");
-	            sql2r = sql2r.replaceAll("_desc1", "Found unknown error, please contact system administrator.");
-	            st2 = con.createStatement();
-				st2.executeUpdate(sql2r);
+	            sql4r = sql4.replaceAll("_status", "F");
+	            sql4r = sql4r.replaceAll("_desc2", "");
+				st4.executeUpdate(sql4r);
 				result = "failed";
 			}
+
 		} catch(NamingException | SQLException ex) {
 			LOG.log(Level.SEVERE, ex.getMessage(), ex);
 			result = "failed";
 		} finally {
             try {
             	if (result.equals("undefined")) {
-    	            sql2r = sql2.replaceAll("_status", "F");
-    	            sql2r = sql2r.replaceAll("_desc1", "Found unknown error, please contact system administrator.");
-    	            st2 = con.createStatement();
-    				st2.executeUpdate(sql2r);
+    	            sql4r = sql4.replaceAll("_status", "F");
+    	            sql4r = sql4r.replaceAll("_desc2", "undefined error");
+    	            st4 = con.createStatement();
+    				st4.executeUpdate(sql4r);
     				result = "failed";
             	}
-                if (rs1 != null) {rs1.close();}if (rs11 != null) {rs11.close();}
-                if (st1 != null) {st1.close();}if (st11 != null) {st11.close();}
+                if (rs1 != null) {rs1.close();}
+                if (st1 != null) {st1.close();}
                 if (st2 != null) {st2.close();}
                 if (st3 != null) {st3.close();}
+                if (st4 != null) {st4.close();}
                 if (con != null) {con.close();}
             } catch (SQLException ex) {
             	LOG.log(Level.WARNING, ex.getMessage(), ex);

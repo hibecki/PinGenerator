@@ -890,15 +890,10 @@ Ink.log("result: " + result);Ink.log("jobId: " + jobId);
 										            	var result = obj.responseJSON['result'];
 									Ink.log("result: " + result);
 														if(result==="succeed"){
-											
-											
-											
-											
-											
-											var crs = new Carousel('#serialMapCarousel');crs.nextPage();
-											InkElement.setHTML(Ink.i('serialMapJobId'),'Job ID: <b style="color:red">' + jobId + '</b>');
-											var probar = new ProgressBar('#serialMapProgressBar');
-											setTimeout(function(){serialMapUpdateProgress(probar,jobId,pinAmount);},2000);
+															var crs = new Carousel('#serialMapCarousel');crs.nextPage();
+															InkElement.setHTML(Ink.i('serialMapJobId'),'Job ID: <b style="color:red">' + jobId + '</b>');
+															var probar = new ProgressBar('#serialMapProgressBar');
+															setTimeout(function(){serialMapUpdateProgress(probar,jobId,pinAmount);},2000);
 														}
 										            }
 										        }, 
@@ -947,27 +942,32 @@ Ink.log("result: " + result);
 
 function serialMapUpdateProgress(probar,jobId,pinAmount) {
 	Ink.requireModules(['Ink.Net.Ajax_1','Ink.Dom.Element_1','Ink.UI.ProgressBar_1'], function(Ajax,InkElement,ProgressBar) {
-		var uri = window.url_home + '/PinCount?jobId='+jobId;
+		var uri = window.url_home + '/SerialMap2Count?jobId='+jobId;
 	    new Ajax(uri, {
 	        method: 'GET',
 	        onSuccess: function(obj) {
 	            if(obj && obj.responseJSON) {
-	            	var result = obj.responseJSON['result'];var c = obj.responseJSON['count'];var status = obj.responseJSON['status'];var desc1 = obj.responseJSON['desc1'];
-Ink.log("result: " + result);Ink.log("jobId: " + jobId);Ink.log("count: " + c);
+	            	var result = obj.responseJSON['result'];var status = obj.responseJSON['status'];var jobType = obj.responseJSON['jobType'];
+	            	var count = obj.responseJSON['count'];var amount = obj.responseJSON['amount'];
+Ink.log("result: " + result);Ink.log("jobId: " + jobId);
 					if(result==="succeed"){
 						if (!probar) {probar = new ProgressBar('#serialMapProgressBar');}
-						var p = c/pinAmount*100;
+						var p = count/amount*100;
 						probar.setValue(Math.floor(p));
-						if (c < pinAmount) {
-							if (status == "F") {
-								InkElement.setHTML(Ink.i('serialMapProgressBarCaption'),'<div style="color:red"><i class="fa fa-cog"></i>&nbsp;&nbsp;Failed</div>');
-								InkElement.setHTML(Ink.i('serialMapAction'),'<div style="color:red">Failed - '+desc1+'</div>');
+						if (jobType == "F") {
+							setTimeout(function(){serialMapUpdateProgress(probar,jobId,pinAmount);},3000);
+						} else if (jobType == "M") {
+							if (count < amount) {
+								if (status == "F") {
+									InkElement.setHTML(Ink.i('serialMapProgressBarCaption'),'<div style="color:red"><i class="fa fa-cog"></i>&nbsp;&nbsp;Failed</div>');
+									InkElement.setHTML(Ink.i('serialMapAction'),'<div style="color:red">Failed</div>');
+								} else {
+									setTimeout(function(){serialMapUpdateProgress(probar,jobId,pinAmount);},3000);
+								}
 							} else {
-								setTimeout(function(){serialMapUpdateProgress(probar,jobId,pinAmount);},3000);
+								InkElement.setHTML(Ink.i('serialMapProgressBarCaption'),'<div style="color:white"><i class="fa fa-cog"></i>&nbsp;&nbsp;Succeed</div>');
+								InkElement.setHTML(Ink.i('serialMapAction'),'Export as CSV file: click <a href="'+window.url_home + '/SerialMapCSV?jobId='+jobId+'">here</a>');
 							}
-						} else {
-							InkElement.setHTML(Ink.i('serialMapProgressBarCaption'),'<div style="color:white"><i class="fa fa-cog"></i>&nbsp;&nbsp;Succeed</div>');
-							InkElement.setHTML(Ink.i('serialMapAction'),'Export as CSV file: click <a href="'+window.url_home + '/SerialMapCSV?jobId='+jobId+'">here</a>');
 						}
 					} else {
 Ink.log("result: " + result);
