@@ -53,6 +53,9 @@ function menuMapSerial() {
 		Ajax.load('serial-map.html', function (res) {
 		    InkElement.setHTML(container,res);
 		});
+		Ajax.load('SerialMapBatchNumber', function (res) {
+			Ink.i('batchNumber').value = res;
+		});
 		Ajax.load('SerialMapPatternDropdown', function (res) {
 	    	InkElement.setHTML(Ink.i('serialPattern'),res);
 		});
@@ -854,6 +857,7 @@ function serialMapButtonConfirmClick() {
 	    var formData = FormSerialize.serialize(form);
 	    var pinAmount = formData.pinAmount;
 	    var serialPattern = formData.serialPattern;
+	    var batchNumber = formData.batchNumber;
 	    
 	    var uri = window.url_home + '/PinCountA?patternid=' + serialPattern;
 	    new Ajax(uri, {
@@ -882,7 +886,7 @@ Ink.log("result: " + result);Ink.log("count: " + count);
 						            	var result = resp.result;var jobId = resp.jobId;
 Ink.log("result: " + result);Ink.log("jobId: " + jobId);
 										if(result==="succeed"){
-										    uri = window.url_home + '/SerialMap2?jobId=' + jobId + '&serialPattern='+serialPattern + '&pinAmount='+pinAmount;
+										    uri = window.url_home + '/SerialMap2?jobId=' + jobId + '&serialPattern='+serialPattern + '&pinAmount='+pinAmount + '&batchNumber=' +batchNumber;
 										    new Ajax(uri, {
 										        method: 'GET',
 										        onSuccess: function(obj) {

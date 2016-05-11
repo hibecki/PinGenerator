@@ -27,6 +27,13 @@
 
 <form id="formSerialMap" class="ink-form">
 <div class="control-group required">
+	<label for="batchNumber">Batch number:</label>
+<div class="control prepend-button"><input type="button" value="BAT" class="ink-button" disabled>
+<span><input id="batchNumber" name="batchNumber" class="ink-fv-required ink-fv-number" style="width:15em;" type="text" placeholder="Batch Number" maxlength="6" onkeypress='return ((event.charCode >= 48 && event.charCode <= 57) || (event.charCode == 188))' ></span>
+
+</div>
+</div>
+<div class="control-group required">
 	<label for="serialPattern">Voucher Template Name:</label>
 	<div class="control">
 

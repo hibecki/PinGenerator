@@ -5,6 +5,10 @@ package pingenerator.tvtelecom.com;
 * @author Thanwa Ananthaseth
 * @version 1.0 - Initial
 * @since 02-Feb-2016
+* *
+* @author Thanwa Ananthaseth
+* @version 1.1 - Add more config path
+* @since 11-May-2016
 */
 
 public class Utils {
@@ -18,7 +22,7 @@ public class Utils {
     public static String PathUpload = "/home/pingen/tomcat7/uploads/";
     //public static String PathFileVIPSerial = "C:/workJava/settings/vipserial";
     public static String PathFileVIPSerial = "/home/pingen/tomcat7/settings/vipserial";
-    
+    public static String PathFileMappingSerialBatchNumber = "/home/pingen/tomcat7/settings/batchmappingserial";
     
     
     

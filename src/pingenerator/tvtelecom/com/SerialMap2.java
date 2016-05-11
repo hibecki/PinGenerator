@@ -5,6 +5,10 @@ import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -35,6 +39,7 @@ public class SerialMap2 extends HttpServlet {
         Logger LOG = Logger.getLogger(SerialMap2.class.getName());
         request.setCharacterEncoding(Utils.CharacterEncoding);
         String jobId = request.getParameter("jobId");
+        String batchNumber = request.getParameter("batchNumber");
         String serialPattern = request.getParameter("serialPattern");
         String pinAmount = request.getParameter("pinAmount");
 
@@ -52,7 +57,7 @@ public class SerialMap2 extends HttpServlet {
 			Statement st = null;
 			ResultSet rs = null;
 			String sql0 = "SELECT * FROM PATTERN WHERE PATTERNID = "+serialPattern;
-			String sql = "update job set DIGIT = _DIGIT, AMOUNT = " + pinAmount + ", PATTERNID = "+serialPattern+", STATUS = 'P', UPDATEDBY = "+ userId + ", UPDATEDDATE = CURRENT_TIMESTAMP where jobId = '" + jobId + "'";
+			String sql = "update job set DIGIT = _DIGIT, AMOUNT = " + pinAmount + ", PATTERNID = "+serialPattern+", DESC3 = '" + batchNumber + "', STATUS = 'P', UPDATEDBY = "+ userId + ", UPDATEDDATE = CURRENT_TIMESTAMP where jobId = '" + jobId + "'";
 			
 			String result="failed";
 			
@@ -71,6 +76,11 @@ public class SerialMap2 extends HttpServlet {
 					sql = sql.replaceAll("_DIGIT", Integer.toString(PINDIGIT));
 	LOG.log(Level.INFO,"sql:{0}",new Object[]{sql});
 					st.executeUpdate(sql);
+					
+					Path pathBatchNumber = Paths.get(Utils.PathFileMappingSerialBatchNumber);
+					long maxBatch = Long.parseLong(batchNumber);
+					Files.write(pathBatchNumber, Long.toString(maxBatch+1).getBytes(), StandardOpenOption.CREATE);
+					
 					result = "succeed";
 				}
 			} catch(NamingException | SQLException ex) {
