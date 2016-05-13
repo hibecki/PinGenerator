@@ -23,7 +23,7 @@ public class Utils {
     //public static String PathFileVIPSerial = "C:/workJava/settings/vipserial";
     public static String PathFileVIPSerial = "/home/pingen/tomcat7/settings/vipserial";
     public static String PathFileMappingSerialBatchNumber = "/home/pingen/tomcat7/settings/batchmappingserial";
-    
+    public static String PathFileMappingSerialBatchNumber3 = "/home/pingen/tomcat7/settings/batchmappingserial3";
     
     
     

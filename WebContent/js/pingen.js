@@ -62,6 +62,21 @@ function menuMapSerial() {
 	});
 }
 
+function menuMapSerial3() {
+	Ink.requireModules(['Ink.Net.Ajax_1','Ink.Dom.Element_1'], function(Ajax,InkElement) {
+		var container = Ink.i('main-panel');
+		Ajax.load('serial-map-3.html', function (res) {
+		    InkElement.setHTML(container,res);
+		});
+		Ajax.load('SerialMapBatchNumber', function (res) {
+			Ink.i('batchNumber').value = res;
+		});
+		Ajax.load('SerialMapPatternDropdown', function (res) {
+	    	InkElement.setHTML(Ink.i('serialPattern'),res);
+		});
+	});
+}
+
 function menuPinExport() {
 	Ink.requireModules(['Ink.Net.Ajax_1','Ink.Dom.Element_1'], function(Ajax,InkElement) {
 		var container = Ink.i('main-panel');

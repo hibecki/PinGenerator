@@ -46,7 +46,7 @@ LOG.log(Level.INFO,"userId:{0} channelName:{1} channelCode:{2} channelDigit:{3} 
 		Connection con = null;
 		Statement st = null;
 		ResultSet rs = null;
-		String sql = "insert into pattern (channel,channelCode,digit,pinDigit,updatedby,updateddate) values ('"+channelName+"','"+channelCode+"',"+channelDigit+","+pinDigit+","+userId+",CURRENT_TIMESTAMP)";
+		String sql = "insert into pattern (channel,channelCode,digit,pinDigit,LASTSERIALNUMBER,updatedby,updateddate) values ('"+channelName+"','"+channelCode+"',"+channelDigit+","+pinDigit+",0,"+userId+",CURRENT_TIMESTAMP)";
 		String result="failed";
 
 		
