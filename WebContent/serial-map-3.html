@@ -3,35 +3,14 @@
     <ul class="stage column-group">
         <li class="slide all-100">
         <div id="serialMapAlert"></div>
-        
-<form id="formSerialMapFileIN" class="ink-form" style="width:50em;" enctype="multipart/form-data">
-
-<div class="control-group column-group required">
-<label for="fileIN" >File PIN History:</label>
-</div>
-<div class="control-group column-group required">
-<div class="control append-button">
-<span><input id="fileIN" name="fileIN" style="width:15em;" type="text"></span>
-<input id="buttonBrowseFileIN" type="button" value="Browse" class="ink-button green" onclick="serialMapBrowseFileINClick();">
-</div>
-<div id="upBar" style="display:none">
-<div id="serialMapUploadProgressBar" class="ink-progress-bar" data-start-value="0" style="position:relative;left:30px;top:10px;width:200px;">
-	<span id="serialMapUploadProgressBarCaption" class="caption"><i class="fa fa-cog fa-spin"></i>&nbsp;&nbsp;Uploading...</span><div class="bar green"></div>
-</div>
-</div>
-
-</div>
-
-<input id="fileINHidden" type="file" style="visibility:hidden" onchange="serialMapBrowseFileINChange()" accept=".csv"/>
-</form>    
 
 <form id="formSerialMap" class="ink-form">
 
 <div class="control-group required">
 <label for="batchNumber">Batch number:</label>
 <div class="control">
-<input id="batchNumberPrefix" name="batchNumberPrefix" class="ink-fv-required" style="width:5.5em;" type="text" placeholder="Prefix" maxlength="8" value="BAT">
-<input id="batchNumber" name="batchNumber" class="ink-fv-required ink-fv-number" style="width:9.25em;" type="text" placeholder="Batch Number" maxlength="6" onkeypress='return ((event.charCode >= 48 && event.charCode <= 57) || (event.charCode == 188))' >
+<input id="batchNumberPrefix" name="batchNumberPrefix" class="ink-fv-required" style="width:5.5em;" type="text" placeholder="Prefix" maxlength="8" value="BAT" onkeypress='return isAlpha(event)' onpaste='return false;' >
+<input id="batchNumber" name="batchNumber" class="ink-fv-required ink-fv-number" style="width:9.25em;" type="text" placeholder="Batch Number" maxlength="6" onkeypress='return isNumber(event)' onpaste='return false;' >
 </div>
 </div>
 
@@ -47,17 +26,22 @@
 <div class="control-group required">
 	<label for="pinAmount">Pin Amount:</label>
 	<div class="control">
-	    <input id="pinAmount" name="pinAmount" class="ink-fv-required ink-fv-number ink-fv-custom nomore25000" style="width:15em;" type="text" placeholder="Pin Amount" maxlength="5" onkeypress='return ((event.charCode >= 48 && event.charCode <= 57) || (event.charCode == 188))' >
+	    <input id="pinAmount" name="pinAmount" class="ink-fv-required ink-fv-number ink-fv-custom nomore25000" style="width:15em;" type="text" placeholder="Pin Amount" maxlength="5" onkeypress='return isNumber(event)' onpaste='return false;' >
 	</div>
 <!-- <p class="tip">Your field has errors</p> -->
 </div>
 
 <div class="control-group required">
-<label for="batchNumber">Serial Number starts with:</label>
-<div class="control">
-<input id="batchNumberPrefix" name="batchNumberPrefix" class="ink-fv-required" style="width:5.5em;" type="text" placeholder="Prefix" maxlength="8" value="BAT">
-<input id="batchNumber" name="batchNumber" class="ink-fv-required ink-fv-number" style="width:9.25em;" type="text" placeholder="Batch Number" maxlength="6" onkeypress='return ((event.charCode >= 48 && event.charCode <= 57) || (event.charCode == 188))' >
+<label for="batchNumber">Serial Number:</label>
+
+
+<div class="control prepend-button"><input id="serialNumberPrefix" type="button" value="29" class="ink-button" style="width:4em;" disabled>
+<span><input id="serialNumber" name="serialNumber" class="ink-fv-required ink-fv-number" style="width:11em;" type="text" placeholder="Serial Number" onkeypress='return isNumber(event)' onpaste='return false;' ></span>
+
 </div>
+
+
+
 </div>
 
 <br/>

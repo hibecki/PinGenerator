@@ -2,6 +2,19 @@ function goHome() {
 	window.location.replace(window.url_home);
 }
 
+function isNumber(e) {
+    var regex = new RegExp("^[0-9]+$");
+    var str = String.fromCharCode(!e.charCode ? e.which : e.charCode);
+    if (regex.test(str)) { return true; }
+    else { e.preventDefault(); return false; }	
+}
+function isAlpha(e) {
+    var regex = new RegExp("^[a-zA-Z]+$");
+    var str = String.fromCharCode(!e.charCode ? e.which : e.charCode);
+    if (regex.test(str)) { return true; }
+    else { e.preventDefault(); return false; }
+}
+
 function menuPinGenBatch() {
 	Ink.requireModules(['Ink.Net.Ajax_1','Ink.Dom.Element_1'], function(Ajax,InkElement) {
 		var container = Ink.i('main-panel');
@@ -55,6 +68,11 @@ function menuMapSerial() {
 		});
 		Ajax.load('SerialMapBatchNumber', function (res) {
 			Ink.i('batchNumber').value = res;
+		});
+		Ajax.load('SerialMapPatternDropdown', function (res) {
+	    	InkElement.setHTML(Ink.i('serialPattern'),res);
+	    	
+	    	
 		});
 		Ajax.load('SerialMapPatternDropdown', function (res) {
 	    	InkElement.setHTML(Ink.i('serialPattern'),res);

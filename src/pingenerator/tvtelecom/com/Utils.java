@@ -26,7 +26,6 @@ public class Utils {
     public static String PathFileMappingSerialBatchNumber3 = "/home/pingen/tomcat7/settings/batchmappingserial3";
     
     
-    
     public static String csvFileForProvince = "/Single/SingleData/province.csv";
     public static String csvFileForProvinceSplitBy = ",";   //    "\\t";
     

@@ -29,7 +29,7 @@ public class SerialMapBatchNumber extends HttpServlet {
 
         String batchNumber = "";
 		try {
-			Path pathBatchNumber = Paths.get(Utils.PathFileMappingSerialBatchNumber);
+			Path pathBatchNumber = Paths.get(Utils.PathFileMappingSerialBatchNumber3);
 			long maxBatch = 0;
 			if (Files.exists(pathBatchNumber)) {
 				byte[] byteMaxBatch = Files.readAllBytes(pathBatchNumber);
