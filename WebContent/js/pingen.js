@@ -877,7 +877,6 @@ function serialMapButtonMapClick() {
         }
 	});
 }
-
 function serialMapButtonConfirmClick() {
 	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Carousel_1','Ink.UI.ProgressBar_1'], function(Ajax,FormSerialize,InkElement,Carousel,ProgressBar) {
 	    var formFile = Ink.i('formSerialMapFileIN');
@@ -973,7 +972,6 @@ Ink.log("result: " + result);
 
 	});
 }
-
 function serialMapUpdateProgress(probar,jobId,pinAmount) {
 	Ink.requireModules(['Ink.Net.Ajax_1','Ink.Dom.Element_1','Ink.UI.ProgressBar_1'], function(Ajax,InkElement,ProgressBar) {
 		var uri = window.url_home + '/SerialMap2Count?jobId='+jobId;
@@ -1014,6 +1012,79 @@ Ink.log("result: " + result);
 	    });
 	});
 }
+
+function serialMap3ButtonMapClick() {
+	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Modal_1','Ink.UI.FormValidator_1'], function(Ajax,FormSerialize,InkElement,Modal,FormValidator) {
+	    var form = Ink.i('formSerialMap');
+	    var pat = Ink.i('serialPattern');
+
+        if (FormValidator.validate(form,{customFlag:[{flag:'nomore25000',msg:'Max Pin Amount: 25000',callback:function(el){return parseInt(el.value, 10) <= 25000;}}]})) {
+            var formData = FormSerialize.serialize(form);
+            InkElement.setHTML(Ink.i('serialMapPatternConfirm'),'Voucher Template Name: <b style="color:red">' + pat.options[pat.selectedIndex].text + '</b>');
+    		InkElement.setHTML(Ink.i('serialMapPinAmountConfirm'),'Pin Amount: <b style="color:red">' + formData.pinAmount + '</b>');
+    		if (typeof modalSerialMap == "undefined") {modalSerialMap = new Modal('#formSerialMapConfirm');}
+    		modalSerialMap.open();
+        }
+	});
+}
+function serialMap3ButtonConfirmClick() {
+	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Carousel_1','Ink.UI.ProgressBar_1'], function(Ajax,FormSerialize,InkElement,Carousel,ProgressBar) {
+		var form = Ink.i('formSerialMap');
+	    var formData = FormSerialize.serialize(form);
+	    var pinAmount = formData.pinAmount;
+	    var serialPattern = formData.serialPattern;
+	    var batchNumber = formData.batchNumber;
+	    
+	    var uri = window.url_home + '/PinCountA?patternid=' + serialPattern;
+	    new Ajax(uri, {
+	        method: 'GET',
+	        onSuccess: function(obj) {
+	            if(obj && obj.responseJSON) {
+	            	var result = obj.responseJSON['result'];var count = obj.responseJSON['count'];
+Ink.log("result: " + result);Ink.log("count: " + count);
+					if(result==="succeed"){
+						if (count >= pinAmount) {
+						    Ink.i('serialPattern').disabled = true;Ink.i('pinAmount').disabled = true;
+						    Ink.i('buttonMap').disabled = true; //Ink.i('buttonCancel').disabled = true;
+
+						    Ink.i('upBar').style.display = "inline";
+							var upbar = new ProgressBar('#serialMapUploadProgressBar');
+							
+						    uri = window.url_home + '/SerialMap3?jobId=' + jobId + '&serialPattern='+serialPattern + '&pinAmount='+pinAmount + '&batchNumber=' +batchNumber;
+						    new Ajax(uri, {
+						        method: 'GET',
+						        onSuccess: function(obj) {
+						            if(obj && obj.responseJSON) {
+						            	var result = obj.responseJSON['result'];
+					Ink.log("result: " + result);
+										if(result==="succeed"){
+											var crs = new Carousel('#serialMapCarousel');crs.nextPage();
+											InkElement.setHTML(Ink.i('serialMapJobId'),'Job ID: <b style="color:red">' + jobId + '</b>');
+											var probar = new ProgressBar('#serialMapProgressBar');
+											setTimeout(function(){serialMapUpdateProgress(probar,jobId,pinAmount);},2000);
+										}
+						            }
+						        }, 
+						        onFailure: function() {result="failed on network!";
+Ink.log("result: " + result);
+						        }
+						    });
+						} else {
+							var alert = '<div class="ink-alert block" role="alert"><button class="ink-dismiss">&times;</button><h4>PIN is not enough!</h4>';
+							alert += '<p>The amount of available PIN in stock is not enough for mapping process<br/>Please generate more PIN before execute further.</p></div>';
+							InkElement.setHTML(Ink.i('serialMapAlert'),alert);
+						}
+					}
+	            }
+	        }, 
+	        onFailure: function() {result="failed on network!";
+Ink.log("result: " + result);
+	        }
+	    });
+	});
+}
+
+
 function serialMapGetSerial() {
 	Ink.requireModules(['Ink.Net.Ajax_1','Ink.Dom.Element_1'], function(Ajax,InkElement) {
 		var sPat = Ink.i('serialPattern')
