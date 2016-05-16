@@ -83,7 +83,9 @@ function menuMapSerial3() {
 		    InkElement.setHTML(container,res);
 		});
 		Ajax.load('SerialMapBatchNumber', function (res) {
-			Ink.i('batchNumber').value = res;
+			var results = res.split('|');
+			Ink.i('batchNumberPrefix').value = results[0];
+			Ink.i('batchNumber').value = results[1];
 		});
 		Ajax.load('SerialMapPatternDropdown', function (res) {
 	    	InkElement.setHTML(Ink.i('serialPattern'),res);
@@ -1031,10 +1033,15 @@ function serialMap3ButtonConfirmClick() {
 	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Carousel_1','Ink.UI.ProgressBar_1'], function(Ajax,FormSerialize,InkElement,Carousel,ProgressBar) {
 		var form = Ink.i('formSerialMap');
 	    var formData = FormSerialize.serialize(form);
+        var batchNumberPrefix = formData.batchNumberPrefix;
+        var batchNumber = formData.batchNumber;
 	    var pinAmount = formData.pinAmount;
 	    var serialPattern = formData.serialPattern;
-	    var batchNumber = formData.batchNumber;
-	    
+        var serialNumberPrefix = formData.serialNumberPrefix;
+        var serialNumber = formData.serialNumber;
+        
+Ink.log("serialNumberPrefix: " + serialNumberPrefix);Ink.log("serialNumber: " + serialNumber);
+        
 	    var uri = window.url_home + '/PinCountA?patternid=' + serialPattern;
 	    new Ajax(uri, {
 	        method: 'GET',
@@ -1046,22 +1053,19 @@ Ink.log("result: " + result);Ink.log("count: " + count);
 						if (count >= pinAmount) {
 						    Ink.i('serialPattern').disabled = true;Ink.i('pinAmount').disabled = true;
 						    Ink.i('buttonMap').disabled = true; //Ink.i('buttonCancel').disabled = true;
-
-						    Ink.i('upBar').style.display = "inline";
-							var upbar = new ProgressBar('#serialMapUploadProgressBar');
 							
-						    uri = window.url_home + '/SerialMap3?jobId=' + jobId + '&serialPattern='+serialPattern + '&pinAmount='+pinAmount + '&batchNumber=' +batchNumber;
+						    uri = window.url_home + '/SerialMap3?batchNumberPrefix='+batchNumberPrefix+'&serialPattern='+serialPattern + '&pinAmount='+pinAmount + '&batchNumber=' +batchNumber+'&serialNumberPrefix='+serialNumberPrefix+'&serialNumber='+serialNumber;
 						    new Ajax(uri, {
 						        method: 'GET',
 						        onSuccess: function(obj) {
 						            if(obj && obj.responseJSON) {
-						            	var result = obj.responseJSON['result'];
+						            	var result = obj.responseJSON['result'];var jobId = obj.responseJSON['jobId'];
 					Ink.log("result: " + result);
 										if(result==="succeed"){
 											var crs = new Carousel('#serialMapCarousel');crs.nextPage();
 											InkElement.setHTML(Ink.i('serialMapJobId'),'Job ID: <b style="color:red">' + jobId + '</b>');
 											var probar = new ProgressBar('#serialMapProgressBar');
-											setTimeout(function(){serialMapUpdateProgress(probar,jobId,pinAmount);},2000);
+											setTimeout(function(){serialMap3UpdateProgress(probar,jobId,pinAmount);},2000);
 										}
 						            }
 						        }, 
@@ -1083,7 +1087,42 @@ Ink.log("result: " + result);
 	    });
 	});
 }
-
+function serialMap3UpdateProgress(probar,jobId,pinAmount) {
+	Ink.requireModules(['Ink.Net.Ajax_1','Ink.Dom.Element_1','Ink.UI.ProgressBar_1'], function(Ajax,InkElement,ProgressBar) {
+		var uri = window.url_home + '/SerialMap3Count?jobId='+jobId;
+	    new Ajax(uri, {
+	        method: 'GET',
+	        onSuccess: function(obj) {
+	            if(obj && obj.responseJSON) {
+	            	var result = obj.responseJSON['result'];
+	            	var count = obj.responseJSON['count'];
+Ink.log("result: " + result);Ink.log("jobId: " + jobId);
+					if(result==="succeed"){
+						if (!probar) {probar = new ProgressBar('#serialMapProgressBar');}
+						var p = count/pinAmount*100;
+						probar.setValue(Math.floor(p));
+							if (count < pinAmount) {
+								setTimeout(function(){serialMap3UpdateProgress(probar,jobId,pinAmount);},3000);
+							} else {
+								InkElement.setHTML(Ink.i('serialMapProgressBarCaption'),'<div style="color:white"><i class="fa fa-cog"></i>&nbsp;&nbsp;Succeed</div>');
+								InkElement.setHTML(Ink.i('serialMapAction'),'Export as CSV file: click <a href="'+window.url_home + '/SerialMapCSV?jobId='+jobId+'">here</a>');
+							}
+						
+					} else {
+Ink.log("result: " + result);
+						InkElement.setHTML(Ink.i('serialMapProgressBarCaption'),'<div style="color:red"><i class="fa fa-cog"></i>&nbsp;&nbsp;Failed</div>');
+						InkElement.setHTML(Ink.i('serialMapAction'),'<div style="color:red">Failed</div>');
+					}
+	            }
+	        }, 
+	        onFailure: function() {result="failed on network!"
+Ink.log("result: " + result);
+				InkElement.setHTML(Ink.i('serialMapProgressBarCaption'),'<div style="color:red"><i class="fa fa-cog"></i>&nbsp;&nbsp;Failed</div>');
+				InkElement.setHTML(Ink.i('serialMapAction'),'<div style="color:red">Failed</div>');
+	        }
+	    });
+	});
+}
 
 function serialMapGetSerial() {
 	Ink.requireModules(['Ink.Net.Ajax_1','Ink.Dom.Element_1'], function(Ajax,InkElement) {

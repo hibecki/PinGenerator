@@ -43,6 +43,7 @@ LOG.log(Level.INFO,"SerialMapCSV JobId:{0}",new Object[]{jobId});
 		
 		String fileName = "PIN_BATXXXXXX";
 		String batchNumber = "";
+		String batchPrefix = "";
 		String result="";
 		try {
 			Context ctx = new InitialContext();
@@ -52,9 +53,11 @@ LOG.log(Level.INFO,"SerialMapCSV JobId:{0}",new Object[]{jobId});
 			
 			rs1 = st1.executeQuery(sql11);
 			if (rs1.next()) {
-				batchNumber = rs1.getString("DESC3");
+				String[] desc2a = rs1.getString("DESC2").split("\\|");
+				batchPrefix = desc2a[0];
+				batchNumber = desc2a[1];
 				int patternId = rs1.getInt("PATTERNID"); 
-				fileName = "PIN_BAT" + batchNumber;
+				fileName = "PIN_" + batchPrefix + batchNumber;
 				rs1.close();
 				sql12 = sql12.replaceAll("_patternid", Integer.toString(patternId));
 				rs1 = st1.executeQuery(sql12);

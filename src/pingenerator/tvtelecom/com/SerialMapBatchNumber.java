@@ -28,21 +28,26 @@ public class SerialMapBatchNumber extends HttpServlet {
         request.setCharacterEncoding(Utils.CharacterEncoding);
 
         String batchNumber = "";
+        String batchPrefix = "";
 		try {
 			Path pathBatchNumber = Paths.get(Utils.PathFileMappingSerialBatchNumber3);
 			long maxBatch = 0;
 			if (Files.exists(pathBatchNumber)) {
 				byte[] byteMaxBatch = Files.readAllBytes(pathBatchNumber);
-				String stringMaxBatch = new String(byteMaxBatch);
-				maxBatch = Long.parseLong(stringMaxBatch);
+				String stringMaxBatchTemp = new String(byteMaxBatch);
+				String[] stringMaxBatch = stringMaxBatchTemp.split("\\|");
+LOG.log(Level.INFO,"SerialMapBatchNumber - stringMaxBatch:{0},{1},{2}",new Object[]{stringMaxBatchTemp,stringMaxBatch[0],stringMaxBatch[1]});
+				batchPrefix = stringMaxBatch[0];
+				maxBatch = Long.parseLong(stringMaxBatch[1]) + 1;
+
 				if (maxBatch >= 1000000) {
 					maxBatch = 1;
-					Files.write(pathBatchNumber, Long.toString(maxBatch+1).getBytes(), StandardOpenOption.CREATE);
+					Files.write(pathBatchNumber, (batchPrefix+"|"+Long.toString(maxBatch)).getBytes(), StandardOpenOption.CREATE);
 				}
-
 			} else {
 				maxBatch = 1;
-				Files.write(pathBatchNumber, Long.toString(maxBatch).getBytes(), StandardOpenOption.CREATE);
+				batchPrefix = "BAT";
+				Files.write(pathBatchNumber, (batchPrefix+"|"+Long.toString(maxBatch)).getBytes(), StandardOpenOption.CREATE);
 			}
 			
 			String maxBatchFormat = "9" + String.format("%0$" + "6d", 0).replace(' ', '0');
@@ -56,7 +61,7 @@ LOG.log(Level.INFO,"SerialMapBatchNumber - batchNumber:{0}",new Object[]{batchNu
 LOG.log(Level.SEVERE, ex.getMessage(), ex);
 		}
 		PrintWriter out = response.getWriter();
-		out.print(batchNumber);
+		out.print(batchPrefix+"|"+batchNumber);
 		out.flush();
 	}
 

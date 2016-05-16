@@ -19,47 +19,39 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
-@WebServlet("/SerialMapPatternDropdown")
-public class SerialMapPatternDropdown extends HttpServlet {
+@WebServlet("/SerialMap3Count")
+public class SerialMap3Count extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
-    public SerialMapPatternDropdown() {
+    public SerialMap3Count() {
         super();
     }
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        Logger LOG = Logger.getLogger(SerialMapPatternDropdown.class.getName());
+        Logger LOG = Logger.getLogger(SerialMap3Count.class.getName());
         request.setCharacterEncoding(Utils.CharacterEncoding);    
-        //String jobId = request.getParameter("jobId");
+        String jobId = request.getParameter("jobId");
         
+LOG.log(Level.INFO,"SerialMap3Count jobId: {0}",new Object[]{jobId});
+
 		Connection con = null;
 		Statement st1 = null;
-		String sql1 ="select * from pattern order by channel";
+		String sql1 = "select count(*) c from pin where serial is not null and jobid = '" + jobId + "'";
 		ResultSet rs1 = null;
 		
 		String result="failed";
-		int PATTERNID;
-		String CHANNEL;
-		//String CHANNELCODE;
-		//int DIGIT;
-		//int PINDIGIT;
-		String selectString = "";
+		int count = 0;
 		try {
 			Context ctx = new InitialContext();
 			DataSource ds = (DataSource)ctx.lookup("java:comp/env/jdbc/PinGen");
 			con = ds.getConnection();
 			st1 = con.createStatement();
 			rs1 = st1.executeQuery(sql1);
-			while (rs1.next()) {
-				PATTERNID = rs1.getInt("PATTERNID");
-				CHANNEL = rs1.getString("CHANNEL");
-				//CHANNELCODE = rs1.getString("CHANNELCODE");
-				//DIGIT = rs1.getInt("DIGIT");
-				//PINDIGIT = rs1.getInt("PINDIGIT");
-				//selectString += "<option value='"+PATTERNID+"'>"+CHANNEL+" + "+DIGIT+" digits; pin "+PINDIGIT+" digits</option>";
-				selectString += "<option value='"+PATTERNID+"'>"+CHANNEL+"</option>";
+			if (rs1.next()) {
+				count = rs1.getInt("c");
+				result = "succeed";
+LOG.log(Level.INFO,"SerialMap3Count count: {0}",new Object[]{count});
 			}
-			result = "succeed";
 		} catch(NamingException | SQLException ex) {
 			LOG.log(Level.SEVERE, ex.getMessage(), ex);
 			result = "failed";
@@ -71,16 +63,11 @@ public class SerialMapPatternDropdown extends HttpServlet {
             	LOG.log(Level.WARNING, ex.getMessage(), ex);
             }
 		}
-/*
+
 		response.setContentType("application/json");
 		response.setCharacterEncoding(Utils.CharacterEncoding);
 		PrintWriter out = response.getWriter();
-		out.print("{\"result\":\""+result+"\",\"selectString\":"+selectString+"}");
-		out.flush();
-*/		
-LOG.log(Level.INFO,"{0} {1}",new Object[]{"SerialMapPatternDropdown: ",selectString});
-		PrintWriter out = response.getWriter();
-		out.print(selectString);
+		out.print("{\"result\":\""+result+"\",\"jobId\":"+jobId+",\"count\":"+count+"}");
 		out.flush();
 	}
 

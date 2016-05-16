@@ -9,7 +9,7 @@
 <div class="control-group required">
 <label for="batchNumber">Batch number:</label>
 <div class="control">
-<input id="batchNumberPrefix" name="batchNumberPrefix" class="ink-fv-required" style="width:5.5em;" type="text" placeholder="Prefix" maxlength="8" value="BAT" onkeypress='return isAlpha(event)' onpaste='return false;' >
+<input id="batchNumberPrefix" name="batchNumberPrefix" class="ink-fv-required" style="width:5.5em;" type="text" placeholder="Prefix" maxlength="8" onkeypress='return isAlpha(event)' onpaste='return false;' >
 <input id="batchNumber" name="batchNumber" class="ink-fv-required ink-fv-number" style="width:9.25em;" type="text" placeholder="Batch Number" maxlength="6" onkeypress='return isNumber(event)' onpaste='return false;' >
 </div>
 </div>
@@ -32,12 +32,9 @@
 </div>
 
 <div class="control-group required">
-<label for="batchNumber">Serial Number:</label>
-
-
-<div class="control prepend-button"><input id="serialNumberPrefix" type="button" value="29" class="ink-button" style="width:4em;" disabled>
+<label for="serialNumber">Serial Number:</label>
+<div class="control prepend-button"><input id="serialNumberPrefix" name="serialNumberPrefix" type="button" class="ink-button" style="width:4em;" disabled>
 <span><input id="serialNumber" name="serialNumber" class="ink-fv-required ink-fv-number" style="width:11em;" type="text" placeholder="Serial Number" onkeypress='return isNumber(event)' onpaste='return false;' ></span>
-
 </div>
 
 
@@ -52,10 +49,10 @@
 
         <li class="slide all-100">
         	<div id="serialMapJobId"></div><br/>
-			<div id="serialMapAction">Finding..</div> 
+			<div id="serialMapAction">Mapping..</div> 
 			<br/><br/>
 			<div id="serialMapProgressBar" class="ink-progress-bar" data-start-value="0">
-    			<span id="serialMapProgressBarCaption" class="caption"><i class="fa fa-cog fa-spin"></i>&nbsp;&nbsp;Finding maximum serial...</span><div class="bar green"></div>
+    			<span id="serialMapProgressBarCaption" class="caption"><i class="fa fa-cog fa-spin"></i>&nbsp;&nbsp;Mapping serial...</span><div class="bar green"></div>
 			</div>
 			<!-- 
 			<br/>You can close this page to continue your work<br/>

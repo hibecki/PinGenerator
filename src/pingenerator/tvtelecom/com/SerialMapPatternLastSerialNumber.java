@@ -54,8 +54,7 @@ public class SerialMapPatternLastSerialNumber extends HttpServlet {
 				DIGIT = rs1.getInt("DIGIT");
 				LASTSERIALNUMBER = rs1.getInt("LASTSERIALNUMBER");
 				Long maxSerial = Long.parseLong(String.format("%1$" + (DIGIT-CHANNELCODE.length()) + "d", 9).replace(' ', '9'));
-				if (LASTSERIALNUMBER >= maxSerial) {LASTSERIALNUMBER = 0;}
-				LASTSERIALNUMBER++;
+				if (LASTSERIALNUMBER > maxSerial) {LASTSERIALNUMBER = 1;}
 				String serialFormat = "9" + String.format("%0$" + (DIGIT-CHANNELCODE.length()) + "d", 0).replace(' ', '0');
 				long serialNumber = Long.parseLong(serialFormat) + LASTSERIALNUMBER;
 				SerialNumber = Long.toString(serialNumber).substring(1);
