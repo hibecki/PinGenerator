@@ -78,7 +78,7 @@ public class SerialMapPatternDropdown extends HttpServlet {
 		out.print("{\"result\":\""+result+"\",\"selectString\":"+selectString+"}");
 		out.flush();
 */		
-LOG.log(Level.INFO,"{0} {1}",new Object[]{"SerialMapPatternDropdown: ",result});
+LOG.log(Level.INFO,"{0} {1}",new Object[]{"SerialMapPatternDropdown: ",selectString});
 		PrintWriter out = response.getWriter();
 		out.print(selectString);
 		out.flush();

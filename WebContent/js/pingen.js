@@ -71,12 +71,8 @@ function menuMapSerial() {
 		});
 		Ajax.load('SerialMapPatternDropdown', function (res) {
 	    	InkElement.setHTML(Ink.i('serialPattern'),res);
-	    	
-	    	
 		});
-		Ajax.load('SerialMapPatternDropdown', function (res) {
-	    	InkElement.setHTML(Ink.i('serialPattern'),res);
-		});
+
 	});
 }
 
@@ -91,6 +87,7 @@ function menuMapSerial3() {
 		});
 		Ajax.load('SerialMapPatternDropdown', function (res) {
 	    	InkElement.setHTML(Ink.i('serialPattern'),res);
+			serialMapGetSerial();
 		});
 	});
 }
@@ -1013,6 +1010,28 @@ Ink.log("result: " + result);
 	        }, 
 	        onFailure: function() {result="failed on network!"
 Ink.log("result: " + result);
+	        }
+	    });
+	});
+}
+function serialMapGetSerial() {
+	Ink.requireModules(['Ink.Net.Ajax_1','Ink.Dom.Element_1'], function(Ajax,InkElement) {
+		var sPat = Ink.i('serialPattern')
+		var patternId = sPat[sPat.selectedIndex].value;
+		if (patternId == '0') {patternId = 3;}
+	    var uri = window.url_home + '/SerialMapPatternLastSerialNumber?patternId='+patternId;
+	    new Ajax(uri, {
+	        method: 'GET',
+	        onSuccess: function(obj) {
+	            if(obj && obj.responseJSON) {
+	              	var json = obj.responseJSON;
+	            	var result = obj.responseJSON['result'];var CHANNELCODE = obj.responseJSON['CHANNELCODE'];var SerialNumber = obj.responseJSON['SerialNumber'];
+	            	Ink.i('serialNumberPrefix').value = CHANNELCODE;
+	            	Ink.i('serialNumber').value = SerialNumber;
+	            }
+	        }, 
+	        onFailure: function() {
+	Ink.log("result: failed on network!");
 	        }
 	    });
 	});
