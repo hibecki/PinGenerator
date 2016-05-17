@@ -200,6 +200,14 @@ function menuPinHistory() {
 	});
 }
 
+function menuChangePassword() {
+	Ink.requireModules(['Ink.Net.Ajax_1','Ink.Dom.Element_1'], function(Ajax,InkElement) {
+		var container = Ink.i('main-panel');
+		Ajax.load('login-password.html', function (res) {
+		    InkElement.setHTML(container,res);
+		});
+	});
+}
 function menuSignout() {
 	Ink.requireModules(['Ink.Net.Ajax_1','Ink.Dom.Element_1'], function(Ajax,InkElement) {
 	    var uri = window.url_home + '/LoginSignout';
@@ -230,6 +238,19 @@ function menuManagePattern() {
 		
 		Ajax.load('PatternTable', function (res) {
 	    	InkElement.setHTML(Ink.i('tbodyPattern'),res);
+		});
+	});
+}
+
+function menuManageCurrentMaxSerial() {
+	Ink.requireModules(['Ink.Net.Ajax_1','Ink.Dom.Element_1'], function(Ajax,InkElement) {
+		var container = Ink.i('main-panel');
+		crs = (function () { return; })(); modalManageSerial = (function () { return; })();
+		Ajax.load('manage-serial.html', function (res) {
+		    InkElement.setHTML(container,res);
+			Ajax.load('PatternSerial', function (res) {
+		    	InkElement.setHTML(Ink.i('tbodySerial'),res);
+			});
 		});
 	});
 }
@@ -295,18 +316,7 @@ function loginButtonLoginClick() {
     	            	var result = obj.responseJSON['result'];var name = obj.responseJSON['name'];
 Ink.log("result: " + result);Ink.log("name: " + name);
     					if(result==="succeed"){
-    						var container = Ink.i('main-screen');
-    						Ajax.load('main.html', function (res) {
-    						    InkElement.setHTML(container,res);
-    						});
-    						var name = obj.responseJSON['name'];
-    						var pre = '&nbsp;';
-    						if(name.length<20){var l = name.length/2;l = 10 - l;for(var i = 1;i <= l; i++){pre += '&nbsp;';}}
-    						name = pre+name+pre;
-    						//InkElement.appendHTML(Ink.i('bar-top-nav'),'<ul class="menu horizontal black push-right"><li><a>'+name+'</a><ul class="submenu" style="background:#1b99ee;"><li><a onclick="" style="color:white;">Change password</a></li><li><a onclick="menuSignout()" style="color:white;">Sign out</a></li></ul></li></ul>');
-    						InkElement.appendHTML(Ink.i('bar-top-nav'),'<ul class="menu horizontal black push-right"><li><a>'+name+'</a></li></ul>');
-    						
-    						setTimeout(function(){updateDashboard();},5000);
+    						goHome();
     					} else {
     					    if (typeof crsLogin == "undefined") {crsLogin = new Carousel('#loginCarousel');}
     						crsLogin.nextPage();	
@@ -1548,6 +1558,80 @@ function managePatternConfirmClick() {
 function managePatternEditGoBack() {
 	Ink.requireModules(['Ink.UI.Carousel_1'], function(Carousel) {
 		if (typeof crs == "undefined") {crs = new Carousel('#managePatternCarousel');}
+		crs.setPage(1);crs.previousPage();
+	});
+}
+
+function manageSerialEditClick(PATTERNID) {
+	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Carousel_1','Ink.UI.ProgressBar_1','Ink.Dom.Event_1'], function(Ajax,FormSerialize,InkElement,Carousel,ProgressBar,InkEvent) {
+		if (typeof crs == "undefined") {crs = new Carousel('#manageSerialCarousel');}
+		crs.nextPage();
+		
+		InkElement.setHTML(Ink.i('confirmMode'),'edit');
+		InkElement.setHTML(Ink.i('confirmPatternId'),PATTERNID);
+		Ink.i('buttonConfirm').className += " green";
+		Ink.i('buttonConfirm').innerHTML = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Yes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+		Ink.i('ManagePatternConfirmMSG').innerHTML = "Do you really want to save pattern?";
+		
+		Ink.i('buttonUpdate').value = '      Save      ';
+		InkEvent.on(Ink.i('buttonUpdate'), 'click', managePatternEditSaveClick);
+		InkElement.setHTML(Ink.i('managePatternEditHead'),'Edit pattern');
+		var uri = window.url_home + '/PatternGetById?patternId='+PATTERNID;
+	    new Ajax(uri, {
+	        method: 'GET',
+	        onSuccess: function(obj) {
+	            if(obj && obj.responseJSON) {
+	            	var result = obj.responseJSON['result'];
+	            	var PATTERNID= obj.responseJSON['PATTERNID'];
+	            	var CHANNEL = obj.responseJSON['CHANNEL'];
+	            	var CHANNELCODE = obj.responseJSON['CHANNELCODE'];
+	            	var DIGIT = obj.responseJSON['DIGIT'];
+	            	var PINDIGIT = obj.responseJSON['PINDIGIT'];
+	            	var serial = obj.responseJSON['SERIALFORMAT'];
+					if(result==="succeed"){
+						Ink.i('patternId').value = PATTERNID;
+						InkElement.setHTML(Ink.i('channelName'),CHANNEL);
+						InkElement.setHTML(Ink.i('channelCode'),CHANNELCODE);
+						Ink.i('serial').value = serial;
+						
+						Ink.i('serial').setAttribute('maxLength',DIGIT-CHANNELCODE.length);
+					}
+				}
+            }, 
+            onFailure: function() {result="failed on network!";
+Ink.log("result: " + result);
+            }
+	    });
+	});
+}
+function manageSerialEditSaveClick() {
+	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Modal_1','Ink.UI.FormValidator_1'], function(Ajax,FormSerialize,InkElement,Modal,FormValidator) {
+		var form = Ink.i('formManageSerial');
+        var formData = FormSerialize.serialize(form);
+        
+		var uri = window.url_home + '/PatternUpdateSerial';
+	    new Ajax(uri, {
+	        method: 'POST',
+	        postBody: formData,
+	        onSuccess: function(obj) {
+	            if(obj && obj.responseJSON) {
+	            	var result = obj.responseJSON['result'];
+Ink.log("result: " + result);
+					if(result==="succeed"){
+						menuManageCurrentMaxSerial();
+					}
+	            }
+	        }, 
+	        onFailure: function() {result="failed on network!"
+Ink.log("result: " + result);
+	        }
+	    });
+
+	});
+}
+function manageSerialEditGoBack() {
+	Ink.requireModules(['Ink.UI.Carousel_1'], function(Carousel) {
+		if (typeof crs == "undefined") {crs = new Carousel('#manageSerialCarousel');}
 		crs.setPage(1);crs.previousPage();
 	});
 }

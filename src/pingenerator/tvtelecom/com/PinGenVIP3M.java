@@ -103,9 +103,9 @@ LOG.log(Level.INFO,"PinGenVIP3M {0} {1} {2} {3}",new Object[]{batchNumberPrefix,
 					serial++;
 					if (serial > maximumSerial) {serial = serialOne;}
 				}
-
+				if (serial != serialOne) {serial--;}
 				Path pathSerial = Paths.get(Utils.PathFileMappingSerialVIPSerialNumber3);
-				Files.write(pathSerial, (serialNumberPrefix+"|"+Long.toString(--serial).substring(1)).getBytes(), StandardOpenOption.CREATE,StandardOpenOption.TRUNCATE_EXISTING);
+				Files.write(pathSerial, (serialNumberPrefix+"|"+Long.toString(serial).substring(1)).getBytes(), StandardOpenOption.CREATE,StandardOpenOption.TRUNCATE_EXISTING);
 				
 				st3 = con.createStatement();
 				st3.executeUpdate(sql3);

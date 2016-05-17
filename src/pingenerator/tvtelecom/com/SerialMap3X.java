@@ -152,7 +152,7 @@ LOG.log(Level.INFO,"SerialMap3X sql11:{0}",new Object[]{sql11});
 										if (serial > maximumSerial) {serial = serialOne;}
 									}
 								}
-
+								if (serial != serialOne) {serial--;}
 								sql51 = sql51.replaceAll("_patternid", Integer.toString(patternId));
 								sql51 = sql51.replaceAll("_maxserial", Long.toString(Long.parseLong(Long.toString(serial).substring(1))));
 LOG.log(Level.INFO,"SerialMap3X sql51:{0}",new Object[]{sql51});
