@@ -19,25 +19,24 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
-@WebServlet("/SerialMapCSV")
-public class SerialMapCSV extends HttpServlet {
+@WebServlet("/PinGenVIP3CSV")
+public class PinGenVIP3CSV extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
-    public SerialMapCSV() {
+    public PinGenVIP3CSV() {
         super();
     }
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        Logger LOG = Logger.getLogger(SerialMapCSV.class.getName());
+        Logger LOG = Logger.getLogger(PinGenVIP3CSV.class.getName());
         request.setCharacterEncoding(Utils.CharacterEncoding);
         String jobId = request.getParameter("jobId");
         
-LOG.log(Level.INFO,"SerialMapCSV JobId:{0}",new Object[]{jobId});
+LOG.log(Level.INFO,"PinGenVIP3CSV JobId:{0}",new Object[]{jobId});
 
 		Connection con = null;
 		Statement st1 = null;
 		String sql11 = "select * from job where jobid = '" + jobId + "'";
-		String sql12 = "select * from pattern where patternid = _patternid";
 		String sql13 ="select * from pinhist where status = 'M' and jobid = '" + jobId + "'";
 		ResultSet rs1 = null;
 		
@@ -55,26 +54,16 @@ LOG.log(Level.INFO,"SerialMapCSV JobId:{0}",new Object[]{jobId});
 			if (rs1.next()) {
 				String[] desc2a = rs1.getString("DESC2").split("\\|");
 				batchPrefix = desc2a[0];
-				batchNumber = desc2a[1];
-				int patternId = rs1.getInt("PATTERNID"); 
+				batchNumber = desc2a[1]; 
 				fileName = "PIN_" + batchPrefix + batchNumber;
-				rs1.close();
-				sql12 = sql12.replaceAll("_patternid", Integer.toString(patternId));
-				rs1 = st1.executeQuery(sql12);
-				
-				if (rs1.next()) {
-					String channelname = rs1.getString("CHANNEL");
-					
-					rs1.close();
-					rs1 = st1.executeQuery(sql13);
-					result = "Sr. No,Voucher Template type,Voucher Batch Number,Voucher Template Name,Serial ID,Pin Number,Status,Package Name,Reseller Account Number,Lock status,Scrap status,Tenant Code\r\n";
-					int count = 0;
-					while (rs1.next()) {
-						result += ++count + ",External,BAT"+batchNumber+","+channelname+","+rs1.getString("SERIAL")+","+rs1.getString("PIN")+",Generated,,,Lock,Unscrap,Default\r\n";
-					}
-				}
-				
 
+				rs1.close();
+				rs1 = st1.executeQuery(sql13);
+				result = "Sr. No,Voucher Template type,Voucher Batch Number,Voucher Template Name,Serial ID,Pin Number,Status,Package Name,Reseller Account Number,Lock status,Scrap status,Tenant Code\r\n";
+				int count = 0;
+				while (rs1.next()) {
+					result += ++count + ",External,"+batchPrefix+batchNumber+",VIP,"+rs1.getString("SERIAL")+","+rs1.getString("PIN")+",Generated,,,Lock,Unscrap,Default\r\n";
+				}
 			}
 LOG.log(Level.INFO,"SerialMapCSV result:{0}",new Object[]{result});
 		} catch(NamingException | SQLException ex) {

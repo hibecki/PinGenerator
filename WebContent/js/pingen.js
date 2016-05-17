@@ -36,9 +36,21 @@ function menuPinGenSpecific() {
 function menuPinGenVIP() {
 	Ink.requireModules(['Ink.Net.Ajax_1','Ink.Dom.Element_1'], function(Ajax,InkElement) {
 		var container = Ink.i('main-panel');
-		Ajax.load('pingen-vip.html', function (res) {
+		Ajax.load('pingen-vip-3.html', function (res) {
 		    InkElement.setHTML(container,res);
+		    
+			Ajax.load('SerialMapBatchNumber', function (res) {
+				var results = res.split('|');
+				Ink.i('batchNumberPrefix').value = results[0];
+				Ink.i('batchNumber').value = results[1];
+			});
+			Ajax.load('PinGenVIP3SerialNumber', function (res) {
+				var results = res.split('|');
+	        	Ink.i('serialNumberPrefix').value = results[0];
+	        	Ink.i('serialNumber').value = results[1];
+			});
 		});
+
 	});
 }
 
@@ -81,16 +93,18 @@ function menuMapSerial3() {
 		var container = Ink.i('main-panel');
 		Ajax.load('serial-map-3.html', function (res) {
 		    InkElement.setHTML(container,res);
+		    
+			Ajax.load('SerialMapBatchNumber', function (res) {
+				var results = res.split('|');
+				Ink.i('batchNumberPrefix').value = results[0];
+				Ink.i('batchNumber').value = results[1];
+			});
+			Ajax.load('SerialMapPatternDropdown', function (res) {
+		    	InkElement.setHTML(Ink.i('serialPattern'),res);
+				serialMapGetSerial();
+			});
 		});
-		Ajax.load('SerialMapBatchNumber', function (res) {
-			var results = res.split('|');
-			Ink.i('batchNumberPrefix').value = results[0];
-			Ink.i('batchNumber').value = results[1];
-		});
-		Ajax.load('SerialMapPatternDropdown', function (res) {
-	    	InkElement.setHTML(Ink.i('serialPattern'),res);
-			serialMapGetSerial();
-		});
+
 	});
 }
 
@@ -687,7 +701,108 @@ console.log(resp.result + ': ' + resp.fileName + ': ' + resp.jobId);
 
 	});
 }
+function pinGenVIP3ButtonCAMClick() {
+	Ink.requireModules(['Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Modal_1'], function(FormSerialize,InkElement,Modal) {
 
+		var foundPin = false;
+		var pinCount = Ink.i('pinCount');
+	    var pValue;
+		for (var i = 1; i <= pinCount.value; i++) {
+			pValue = Ink.i('pin'+i).value;
+			if (pValue.match(/\S/)) {foundPin = true;}
+		}
+        
+		if (foundPin) {
+	        if (typeof modalPinGenVIP == "undefined") {modalPinGenVIP = new Modal('#formPinGenVIPConfirm');}
+			modalPinGenVIP.open();
+		} else {
+			var alert = '<div class="ink-alert block" role="alert"><button class="ink-dismiss">&times;</button><h4>Missing VIP PIN!</h4>';
+			alert += '<p>Please enter VIP PIN</p></div>';
+			InkElement.setHTML(Ink.i('pinGenVIPAlert'),alert);
+		}
+
+	});
+}
+function pinGenVIP3ButtonConfirmClick() {
+	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Carousel_1','Ink.UI.ProgressBar_1'], function(Ajax,FormSerialize,InkElement,Carousel,ProgressBar) {
+		InkElement.setHTML(Ink.i('pinGenVIPAlert'),'');
+
+		var pinCount = Ink.i('pinCount');
+Ink.log("pinCount: " + pinCount.value);
+	    var pValue;var aPin = [];
+		for (var i = 1; i <= pinCount.value; i++) {
+			pValue = Ink.i('pin'+i).value;
+Ink.log("i " + i);
+			if (pValue.match(/\S/)) {aPin.push(pValue);Ink.log("push i " + i);}
+		}
+		InkElement.setHTML(Ink.i('pinInput'),'');
+		pinCount.value = aPin.length;
+		for (var i = 0; i < aPin.length; i++) {
+			var pinInputHtml = '<div class="control-group column-group"><div class="control">';
+			pinInputHtml += '<input id="pin'+i+'" name="pin'+i+'" value="'+aPin[i]+'" style="width:15em;" type="text" placeholder="VIP Pin" maxlength="15" onkeypress=\'return (event.charCode >= 48 && event.charCode <= 57)\'>';
+			pinInputHtml += '</div><div id="pinSpin'+i+'" style="font-size:1.6em;margin-top:-.3em;margin-left:.8em"><i class="fa fa-cog fa-spin"></i></div>&nbsp;&nbsp;&nbsp;<div id="pinMsg'+i+'"></div></div>';
+			InkElement.appendHTML(Ink.i('pinInput'),pinInputHtml);
+			Ink.i('pin'+i).disabled = true;
+		}
+		var form = Ink.i('formPinGenVIP');
+	    var formData = FormSerialize.serialize(form);
+		Ajax.load('PinGenVIP3?s=P&batchNumberPrefix='+formData.batchNumberPrefix+'&batchNumber='+formData.batchNumber+'&serialNumberPrefix='+formData.serialNumberPrefix+'&serialNumber='+formData.serialNumber, function (res) {
+			var jobId = res;
+
+    	    Ink.i('buttonCAM').disabled = true;Ink.i('buttonCancel').disabled = true;
+    	    Ink.i('batchNumberPrefix').disabled = true;Ink.i('batchNumber').disabled = true;
+    	    Ink.i('serialNumberPrefix').disabled = true;Ink.i('serialNumber').disabled = true;
+    	    
+			var countSuccess = 0;
+			for (var i = 0; i < aPin.length; i++) {
+				var uri = window.url_home + '/PinGenVIP3X?pin='+aPin[i]+'&pinId='+i+'&jobId='+jobId;
+			    new Ajax(uri, {asynchronous: false,
+			        method: 'GET',
+			        onSuccess: function(obj) {
+			            if(obj && obj.responseJSON) {
+			            	var result = obj.responseJSON['result'];
+	Ink.log("result: " + result + " pin: " +  obj.responseJSON['pin']);
+							if(result==="duplicated"){
+								InkElement.setHTML(Ink.i('pinSpin'+i),'<i class="fa fa-times-circle" style="color:red"></i>');
+								InkElement.setHTML(Ink.i('pinMsg'+i),'<div class="ink-label red" style="font-size:.5em;height:1.8em;margin-top:1.4em;">Duplicated PIN</div>');
+							} else if(result==="succeed"){countSuccess++;Ink.log("countSuccess: " + countSuccess);
+								InkElement.setHTML(Ink.i('pinSpin'+i),'<i class="fa fa-check-circle" style="color:green"></i>');
+							} else {
+								InkElement.setHTML(Ink.i('pinSpin'+i),'<i class="fa fa-times-circle" style="color:red"></i>');
+							}
+			            }
+			        }, 
+			        onFailure: function() {result="failed on network!"
+	Ink.log("result: " + result);
+			        	InkElement.setHTML(Ink.i('pinSpin'+i),'<i class="fa fa-times-circle" style="color:red">Network</i>');
+			        }
+			    });
+			}
+
+			
+			var uri = window.url_home + '/PinGenVIP3M?jobId='+jobId;
+		    new Ajax(uri, {
+		        method: 'GET',
+		        onSuccess: function(obj) {
+		            if(obj && obj.responseJSON) {
+		            	var result = obj.responseJSON['result'];var jobId = obj.responseJSON['jobId'];
+						if(result==="succeed"){
+							InkElement.setHTML(Ink.i('pinGenVIPJobId'),'Job ID: <b style="color:red">' + jobId + '</b>');
+							InkElement.appendHTML(Ink.i('pinGenVIPJobId'),'<br/>Download result as CSV file: click <a href="'+window.url_home + '/PinGenVIP3CSV?jobId='+jobId+'">here</a>');
+							InkElement.setHTML(Ink.i('pinGenVIPButton'),'<div class="push-left"><button class="ink-button" onclick="goHome()">&nbsp;&nbsp;&nbsp;Close&nbsp;&nbsp;&nbsp;</button></div>');
+							InkElement.remove('pinGenVIPPlus');InkElement.remove('pinGenVIPPlus');
+						}
+					}
+	            }, 
+	            onFailure: function() {result="failed on network!";
+Ink.log("result: " + result);
+	            }
+		    });
+			
+
+		});
+	});
+}
 
 
 

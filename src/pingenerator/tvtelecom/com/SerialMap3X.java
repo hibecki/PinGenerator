@@ -109,7 +109,7 @@ LOG.log(Level.INFO,"SerialMap3X sql11:{0}",new Object[]{sql11});
 						batchNumber = Long.toString(maxBatch).substring(1);
 						
 						Path pathBatchNumber = Paths.get(Utils.PathFileMappingSerialBatchNumber3);
-						Files.write(pathBatchNumber, (batchNumberPrefix+"|"+batchNumber).getBytes(), StandardOpenOption.CREATE);
+						Files.write(pathBatchNumber, (batchNumberPrefix+"|"+batchNumber).getBytes(), StandardOpenOption.CREATE,StandardOpenOption.TRUNCATE_EXISTING);
 
 			            sql2r = sql2.replaceAll("_status", "P");
 			            sql2r = sql2r.replaceAll("_desc1", "");

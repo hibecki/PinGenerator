@@ -42,10 +42,10 @@ LOG.log(Level.INFO,"SerialMapBatchNumber - stringMaxBatch:{0},{1},{2}",new Objec
 
 				if (maxBatch >= 1000000) {
 					maxBatch = 1;
-					Files.write(pathBatchNumber, (batchPrefix+"|"+Long.toString(maxBatch)).getBytes(), StandardOpenOption.CREATE);
+					//Files.write(pathBatchNumber, (batchPrefix+"|"+Long.toString(maxBatch)).getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 				}
 			} else {
-				maxBatch = 1;
+				maxBatch = 999999;
 				batchPrefix = "BAT";
 				Files.write(pathBatchNumber, (batchPrefix+"|"+Long.toString(maxBatch)).getBytes(), StandardOpenOption.CREATE);
 			}
