@@ -217,11 +217,12 @@ function menuManagePattern() {
 	
 		Ajax.load('manage-pattern.html', function (res) {
 		    InkElement.setHTML(container,res);
+			
+			Ajax.load('PatternTable', function (res) {
+		    	InkElement.setHTML(Ink.i('tbodyPattern'),res);
+			});
 		});
-		
-		Ajax.load('PatternTable', function (res) {
-	    	InkElement.setHTML(Ink.i('tbodyPattern'),res);
-		});
+
 	});
 }
 
@@ -235,6 +236,22 @@ function menuManageCurrentMaxSerial() {
 		    	InkElement.setHTML(Ink.i('tbodySerial'),res);
 			});
 		});
+	});
+}
+function menuManageUsers() {
+	Ink.requireModules(['Ink.Net.Ajax_1','Ink.Dom.Element_1'], function(Ajax,InkElement) {
+		var container = Ink.i('main-panel');
+		crs = (function () { return; })(); modalManagePattern = (function () { return; })();
+	
+		Ajax.load('manage-users.html', function (res) {
+		    InkElement.setHTML(container,res);
+		    
+			
+			Ajax.load('LoginUsersTable', function (res) {
+		    	InkElement.setHTML(Ink.i('tbodyUsers'),res);
+			});
+		});
+
 	});
 }
 
@@ -1413,7 +1430,95 @@ function pinHistoryButtonSearchClick() {
 	
 }
 
+function manageUsersButtonPlusClick() {
+	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Carousel_1','Ink.UI.ProgressBar_1','Ink.Dom.Event_1'], function(Ajax,FormSerialize,InkElement,Carousel,ProgressBar,InkEvent) {
+		if (typeof crs == "undefined") {crs = new Carousel('#manageUsersCarousel');}
+		crs.nextPage();
 
+		InkElement.setHTML(Ink.i('confirmMode'),'add');
+		Ink.i('buttonConfirm').className += " green";
+		Ink.i('buttonConfirm').innerHTML = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Yes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+		Ink.i('ManagePatternConfirmMSG').innerHTML = "Do you really want to add new pattern?";
+		
+		Ink.i('buttonUpdate').value = "   Add new   ";
+		InkEvent.on(Ink.i('buttonUpdate'), 'click', manageUsersEditAddClick);
+		InkElement.setHTML(Ink.i('managePatternEditHead'),'Add new user');
+		Ink.i('channelName').value = '';
+		Ink.i('channelCode').value = '';
+		Ink.i('channelDigit').value = '';
+		Ink.i('pinDigit').value = '';
+	});
+}
+function manageUsersEditAddClick() {
+	Ink.requireModules(['Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Modal_1','Ink.UI.FormValidator_1'], function(FormSerialize,InkElement,Modal,FormValidator) {
+	    var form = Ink.i('formManageUsers');
+        if (FormValidator.validate(form)) {
+            var formData = FormSerialize.serialize(form);
+            
+			InkElement.setHTML(Ink.i('ManageUsersConfirmName'),'Name: <b style="color:red">' + formData.name + '</b>');
+			InkElement.setHTML(Ink.i('ManageUsersConfirmUsername'),'Username: <b style="color:red">' + formData.userName + '</b>');
+
+			if (typeof modalManageUsers == "undefined") {modalManageUsers = new Modal('#formManageUsersConfirm');}
+			modalManageUsers.open(); 
+        }
+	});
+}
+function manageUsersEditGoBack() {
+	Ink.requireModules(['Ink.UI.Carousel_1'], function(Carousel) {
+		if (typeof crs == "undefined") {crs = new Carousel('#manageUsersCarousel');}
+		crs.setPage(1);crs.previousPage();
+	});
+}
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+function manageUsersConfirmClick() {
+	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Modal_1','Ink.UI.FormValidator_1'], function(Ajax,FormSerialize,InkElement,Modal,FormValidator) {
+		var confirmMode = Ink.i('confirmMode').innerHTML;
+		var uri = '';
+		if (confirmMode != 'delete') {
+			var form = Ink.i('formUsersPattern');
+	        var formData = FormSerialize.serialize(form);
+	        Ink.i('channelName').disabled = true;
+	        if (confirmMode != 'edit') {
+	        	uri = window.url_home + '/PatternAdd';
+	        } else {
+	        	uri = window.url_home + '/PatternUpdate';
+	        }
+		    new Ajax(uri, {
+		        method: 'POST',
+		        postBody: formData,
+		        onSuccess: function(obj) {
+		            if(obj && obj.responseJSON) {
+		            	var result = obj.responseJSON['result'];
+	Ink.log("result: " + result);
+						if(result==="succeed"){
+							menuManagePattern();
+						}
+		            }
+		        }, 
+		        onFailure: function() {result="failed on network!"
+	Ink.log("result: " + result);
+		        }
+		    });
+		} else {
+			uri = window.url_home + '/PatternDelete?patternId=' + InkElement.textContent('confirmPatternId');
+		    new Ajax(uri, {
+		        method: 'GET',
+		        onSuccess: function(obj) {
+		            if(obj && obj.responseJSON) {
+		            	var result = obj.responseJSON['result'];
+	Ink.log("result: " + result);
+						if(result==="succeed"){
+							menuManagePattern();
+						}
+		            }
+		        }, 
+		        onFailure: function() {result="failed on network!"
+	Ink.log("result: " + result);
+		        }
+		    });
+		}
+	});
+}
 
 function managePatternButtonPlusClick() {
 	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Carousel_1','Ink.UI.ProgressBar_1','Ink.Dom.Event_1'], function(Ajax,FormSerialize,InkElement,Carousel,ProgressBar,InkEvent) {

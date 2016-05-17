@@ -39,7 +39,7 @@ LOG.log(Level.INFO,"LoginCheckSession userId:{0} name:{1} roleId: {2}",new Objec
     		response.setContentType("application/json");
     		response.setCharacterEncoding(Utils.CharacterEncoding);
     		PrintWriter out = response.getWriter();
-    		out.print("{\"result\":\""+result+"\",\"name\":\""+name+"\",\"roleId\":"+roleId+"}");
+    		out.print("{\"result\":\""+result+"\",\"name\":\""+name+"\",\"roleId\":\""+roleId+"\"}");
     		out.flush();
         }
 	}
