@@ -24,12 +24,13 @@ public class LoginCheckSession extends HttpServlet {
         Logger LOG = Logger.getLogger(LoginCheckSession.class.getName());
         request.setCharacterEncoding(Utils.CharacterEncoding);
         String name = "";
+        String roleId = "";
 		String result="failed";
         try {
     		HttpSession session = request.getSession(false);
     		String userId = ((Integer)session.getAttribute("userId")).toString();
     		name = (String)session.getAttribute("name");
-    		String roleId = ((Integer)session.getAttribute("roleId")).toString();
+    		roleId = ((Integer)session.getAttribute("roleId")).toString();
 LOG.log(Level.INFO,"LoginCheckSession userId:{0} name:{1} roleId: {2}",new Object[]{userId,name,roleId});
 			result = "succeed";
         } catch (java.lang.NullPointerException e) {
@@ -38,7 +39,7 @@ LOG.log(Level.INFO,"LoginCheckSession userId:{0} name:{1} roleId: {2}",new Objec
     		response.setContentType("application/json");
     		response.setCharacterEncoding(Utils.CharacterEncoding);
     		PrintWriter out = response.getWriter();
-    		out.print("{\"result\":\""+result+"\",\"name\":\""+name+"\"}");
+    		out.print("{\"result\":\""+result+"\",\"name\":\""+name+"\",\"roleId\":"+roleId+"}");
     		out.flush();
         }
 	}

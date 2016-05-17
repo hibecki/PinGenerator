@@ -1,7 +1,17 @@
 function goHome() {
 	window.location.replace(window.url_home);
 }
-
+function addSep(nStr) {
+    nStr += '';
+    x = nStr.split('.');
+    x1 = x[0];
+    x2 = x.length > 1 ? '.' + x[1] : '';
+    var rgx = /(\d+)(\d{3})/;
+    while (rgx.test(x1)) {
+        x1 = x1.replace(rgx, '$1' + ',' + '$2');
+    }
+    return x1 + x2;
+}
 function isNumber(e) {
     var regex = new RegExp("^[0-9]+$");
     var str = String.fromCharCode(!e.charCode ? e.which : e.charCode);
@@ -200,33 +210,6 @@ function menuPinHistory() {
 	});
 }
 
-function menuChangePassword() {
-	Ink.requireModules(['Ink.Net.Ajax_1','Ink.Dom.Element_1'], function(Ajax,InkElement) {
-		var container = Ink.i('main-panel');
-		Ajax.load('login-password.html', function (res) {
-		    InkElement.setHTML(container,res);
-		});
-	});
-}
-function menuSignout() {
-	Ink.requireModules(['Ink.Net.Ajax_1','Ink.Dom.Element_1'], function(Ajax,InkElement) {
-	    var uri = window.url_home + '/LoginSignout';
-	    new Ajax(uri, {
-	        method: 'GET',
-	        onSuccess: function(obj) {
-	            if(obj && obj.responseJSON) {
-	            	var result = obj.responseJSON['result'];
-Ink.log("result: " + result);
-					goHome();
-	            }
-	        }, 
-	        onFailure: function() {result="failed on network!"
-Ink.log("result: " + result);goHome();
-	        }
-	    });
-	});
-}
-
 function menuManagePattern() {
 	Ink.requireModules(['Ink.Net.Ajax_1','Ink.Dom.Element_1'], function(Ajax,InkElement) {
 		var container = Ink.i('main-panel');
@@ -255,16 +238,32 @@ function menuManageCurrentMaxSerial() {
 	});
 }
 
-function addSep(nStr) {
-    nStr += '';
-    x = nStr.split('.');
-    x1 = x[0];
-    x2 = x.length > 1 ? '.' + x[1] : '';
-    var rgx = /(\d+)(\d{3})/;
-    while (rgx.test(x1)) {
-        x1 = x1.replace(rgx, '$1' + ',' + '$2');
-    }
-    return x1 + x2;
+function menuChangePassword() {
+	Ink.requireModules(['Ink.Net.Ajax_1','Ink.Dom.Element_1'], function(Ajax,InkElement) {
+		var container = Ink.i('main-panel');
+		Ajax.load('login-password.html', function (res) {
+		    InkElement.setHTML(container,res);
+		});
+	});
+}
+
+function menuSignout() {
+	Ink.requireModules(['Ink.Net.Ajax_1','Ink.Dom.Element_1'], function(Ajax,InkElement) {
+	    var uri = window.url_home + '/LoginSignout';
+	    new Ajax(uri, {
+	        method: 'GET',
+	        onSuccess: function(obj) {
+	            if(obj && obj.responseJSON) {
+	            	var result = obj.responseJSON['result'];
+Ink.log("result: " + result);
+					goHome();
+	            }
+	        }, 
+	        onFailure: function() {result="failed on network!"
+Ink.log("result: " + result);goHome();
+	        }
+	    });
+	});
 }
 
 function updateDashboard() {
@@ -330,9 +329,47 @@ Ink.log("result: " + result);
         }
 	});
 }
-
 function loginButtonTryAgainClick() {
 	crsLogin.previousPage();
+}
+function loginChangePassword() {
+	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Modal_1','Ink.UI.FormValidator_1'], function(Ajax,FormSerialize,InkElement,Modal,FormValidator) {
+	    var form = Ink.i('formLoginPassword');
+        if (FormValidator.validate(form)) {
+            var formData = FormSerialize.serialize(form);
+            if (formData.pNow != formData.pNow2) {
+				var alert = '<div class="ink-alert block" role="alert"><button class="ink-dismiss">&times;</button><h4>Please verify your new password</h4>';
+				alert += '<p>Your new password is not match</p></div>';
+            	InkElement.setHTML(Ink.i('loginPasswordAlert'),alert);
+            } else {
+                var uri = window.url_home + '/LoginChangePassword';
+                new Ajax(uri, {
+                    method: 'POST',
+                    postBody: formData,
+                    onSuccess: function(obj) {
+                        if(obj && obj.responseJSON) {
+                        	var result = obj.responseJSON['result'];
+            				if(result==="succeed"){
+                				var alert = '<div class="ink-alert block success" role="alert"><h4>Succeed</h4>';
+            					alert += '<p>Password has been changed</p></div>';
+            					InkElement.setHTML(Ink.i('loginPasswordAlert'),alert);
+            					InkElement.setHTML(Ink.i('formLoginPassword'),'<input type="button" value="Close" class="ink-button green" onclick="goHome()">');
+            				} else {
+                				var alert = '<div class="ink-alert block" role="alert"><button class="ink-dismiss">&times;</button><h4>Change password failed!</h4>';
+            					alert += '<p>'+result+'</p></div>';
+            					InkElement.setHTML(Ink.i('loginPasswordAlert'),alert);
+            				}
+                        }
+                    }, 
+                    onFailure: function() {
+        				var alert = '<div class="ink-alert block" role="alert"><button class="ink-dismiss">&times;</button><h4>Network failed!</h4>';
+    					alert += '<p>Please contact your network administrator</p></div>';
+    					InkElement.setHTML(Ink.i('loginPasswordAlert'),alert);
+                    }
+                });
+            }
+        }
+	});
 }
 
 function pinGenBatchButtonGenerateClick() {
