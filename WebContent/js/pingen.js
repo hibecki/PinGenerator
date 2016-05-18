@@ -993,22 +993,22 @@ function comparePinButtonSubmitClick() {
 }
 function comparePinUpdateProgress(jobId,probar) {
 	Ink.requireModules(['Ink.Net.Ajax_1','Ink.Dom.Element_1','Ink.UI.ProgressBar_1'], function(Ajax,InkElement,ProgressBar) {
-	    var uri = window.url_home + '/PinCompareCount?jobId=' + jobId;
+	    var uri = window.url_home + '/PinCompare3Count?jobId=' + jobId;
 	    new Ajax(uri, {
 	        method: 'GET',
 	        onSuccess: function(obj) {
 	            if(obj && obj.responseJSON) {
-	            	var result = obj.responseJSON['result'];var c = obj.responseJSON['count'];
+	            	var result = obj.responseJSON['result'];var c = obj.responseJSON['count'];var amount = obj.responseJSON['amount'];
 	Ink.log("result: " + result);
 					if(result==="succeed"){
 						InkElement.setHTML(Ink.i('pinCompareAction'),'Comparing..');
 						InkElement.setHTML(Ink.i('pinCompareProgressBarCaption'),'<i class="fa fa-cog fa-spin"></i>&nbsp;&nbsp;Comparing...');
-						probar.setValue(Math.ceil(c));
-						if ((c < 100) && (document.getElementById('pinCompareAction'))) {
+						probar.setValue(Math.ceil(c/amount*100));
+						if ((c < amount) && (document.getElementById('pinCompareAction'))) {
 							setTimeout(function(){comparePinUpdateProgress(jobId,probar);},3000);
 						} else {
 							InkElement.setHTML(Ink.i('pinCompareProgressBarCaption'),'<div style="color:white"><i class="fa fa-cog"></i>&nbsp;&nbsp;Succeed</div>');
-							InkElement.setHTML(Ink.i('pinCompareAction'),'Download duplicated PIN as CSV file: click <a href="'+window.url_home + '/PinHistDownloadCSV?status=D&jobId='+jobId+'">here</a>');
+							InkElement.setHTML(Ink.i('pinCompareAction'),'Download duplicated PIN as CSV file: click <a href="'+window.url_home + '/PinCompare3CSV?jobId='+jobId+'">here</a>');
 						}
 					
 					}
@@ -1521,7 +1521,7 @@ function manageUsersEditClick(userID) {
 	        onSuccess: function(obj) {
 	            if(obj && obj.responseJSON) {
 	            	var result = obj.responseJSON['result'];
-	            	var USERID= obj.responseJSON['USERID'];
+	            	var USERID = obj.responseJSON['USERID'];
 	            	var NAME = obj.responseJSON['NAME'];
 	            	var USERNAME = obj.responseJSON['USERNAME'];
 					if(result==="succeed"){
@@ -1546,9 +1546,41 @@ function manageUsersEditSaveClick() {
 			InkElement.setHTML(Ink.i('ManageUsersConfirmName'),'Name: <b style="color:red">' + formData.name + '</b>');
 			InkElement.setHTML(Ink.i('ManageUsersConfirmUsername'),'Username: <b style="color:red">' + formData.userName + '</b>');
 
-			if (typeof modalManageUsers == "undefined") {modalManageUsers = new Modal('#formManageUsersConfirm');}
-			modalManageUsers.open(); 
+			modalManageUsers = new Modal('#formManageUsersConfirm');
+			modalManageUsers.open();
         }
+	});
+}
+function manageUsersDeleteClick(userID) {
+	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Carousel_1','Ink.UI.ProgressBar_1','Ink.Dom.Event_1','Ink.UI.Modal_1'], function(Ajax,FormSerialize,InkElement,Carousel,ProgressBar,InkEvent,Modal) {
+		var uri = window.url_home + '/LoginUserGetById?userID='+userID;
+	    new Ajax(uri, {
+	        method: 'GET',
+	        onSuccess: function(obj) {
+	            if(obj && obj.responseJSON) {
+	            	var result = obj.responseJSON['result'];
+	            	var USERID = obj.responseJSON['USERID'];
+	            	var NAME = obj.responseJSON['NAME'];
+	            	var USERNAME = obj.responseJSON['USERNAME'];          	
+					if(result==="succeed"){
+						InkElement.setHTML(Ink.i('ManageUsersConfirmName'),'Name: <b style="color:red">' + NAME + '</b>');
+						InkElement.setHTML(Ink.i('ManageUsersConfirmUsername'),'Username: <b style="color:red">' + USERNAME + '</b>');
+
+						InkElement.setHTML(Ink.i('confirmMode'),'delete');
+						InkElement.setHTML(Ink.i('confirmUserId'),userID);
+						Ink.i('buttonConfirm').className += " red";
+						InkElement.setHTML(Ink.i('buttonConfirm'),'&nbsp;&nbsp;&nbsp;Delete&nbsp;&nbsp;&nbsp;');
+						InkElement.setHTML(Ink.i('ManageUsersConfirmMSG'),"Do you really want to <b style='color:red'>DELETE</b>?");
+
+						modalManageUsers = new Modal('#formManageUsersConfirm');
+						modalManageUsers.open();
+					}
+				}
+            }, 
+            onFailure: function() {result="failed on network!";
+Ink.log("result: " + result);
+            }
+	    });
 	});
 }
 function manageUsersGoBack() {
@@ -1562,9 +1594,8 @@ function manageUsersConfirmClick() {
 		var confirmMode = Ink.i('confirmMode').innerHTML;
 		var uri = '';
 		if (confirmMode != 'delete') {
-			var form = Ink.i('formManageUsers'); //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+			var form = Ink.i('formManageUsers');
 	        var formData = FormSerialize.serialize(form);
-	        //Ink.i('channelName').disabled = true;
 	        if (confirmMode != 'edit') {
 	        	uri = window.url_home + '/LoginUsersAdd';
 	        } else {
@@ -1587,7 +1618,7 @@ function manageUsersConfirmClick() {
 		        }
 		    });
 		} else {
-			uri = window.url_home + '/LoginUsersDelete?userId=' + InkElement.textContent('confirmPatternId');
+			uri = window.url_home + '/LoginUsersDelete?userId=' + InkElement.textContent('confirmUserId');
 		    new Ajax(uri, {
 		        method: 'GET',
 		        onSuccess: function(obj) {
@@ -1608,7 +1639,7 @@ function manageUsersConfirmClick() {
 }
 
 function managePatternButtonPlusClick() {
-	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Carousel_1','Ink.UI.ProgressBar_1','Ink.Dom.Event_1'], function(Ajax,FormSerialize,InkElement,Carousel,ProgressBar,InkEvent) {
+	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Carousel_1','Ink.Dom.Event_1','Ink.UI.FormValidator_1'], function(Ajax,FormSerialize,InkElement,Carousel,InkEvent,FormValidator) {
 		if (typeof crs == "undefined") {crs = new Carousel('#managePatternCarousel');}
 		crs.nextPage();
 
@@ -1620,6 +1651,12 @@ function managePatternButtonPlusClick() {
 		Ink.i('buttonUpdate').value = "   Add new   ";
 		InkEvent.on(Ink.i('buttonUpdate'), 'click', managePatternEditAddClick);
 		InkElement.setHTML(Ink.i('managePatternEditHead'),'Add new pattern');
+		
+		Ink.i('channelName').value = '1';
+		Ink.i('channelCode').value = '1';
+		Ink.i('channelDigit').value = '1';
+		Ink.i('pinDigit').value = '1';
+		FormValidator.validate(Ink.i('formManagePattern'));
 		Ink.i('channelName').value = '';
 		Ink.i('channelCode').value = '';
 		Ink.i('channelDigit').value = '';
@@ -1663,7 +1700,7 @@ Ink.log("result: " + result);
 }
 
 function managePatternEditClick(PATTERNID) {
-	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Carousel_1','Ink.UI.ProgressBar_1','Ink.Dom.Event_1'], function(Ajax,FormSerialize,InkElement,Carousel,ProgressBar,InkEvent) {
+	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Carousel_1','Ink.UI.ProgressBar_1','Ink.Dom.Event_1','Ink.UI.FormValidator_1'], function(Ajax,FormSerialize,InkElement,Carousel,ProgressBar,InkEvent,FormValidator) {
 		if (typeof crs == "undefined") {crs = new Carousel('#managePatternCarousel');}
 		crs.nextPage();
 		
@@ -1676,6 +1713,17 @@ function managePatternEditClick(PATTERNID) {
 		Ink.i('buttonUpdate').value = '      Save      ';
 		InkEvent.on(Ink.i('buttonUpdate'), 'click', managePatternEditSaveClick);
 		InkElement.setHTML(Ink.i('managePatternEditHead'),'Edit pattern');
+		
+		Ink.i('channelName').value = '1';
+		Ink.i('channelCode').value = '1';
+		Ink.i('channelDigit').value = '1';
+		Ink.i('pinDigit').value = '1';
+		FormValidator.validate(Ink.i('formManagePattern'));
+		Ink.i('channelName').value = '';
+		Ink.i('channelCode').value = '';
+		Ink.i('channelDigit').value = '';
+		Ink.i('pinDigit').value = '';
+		
 		var uri = window.url_home + '/PatternGetById?patternId='+PATTERNID;
 	    new Ajax(uri, {
 	        method: 'GET',
@@ -1713,7 +1761,8 @@ function managePatternEditAddClick() {
 			InkElement.setHTML(Ink.i('ManagePatternConfirmChannel'),'Channel: <b style="color:red">' + formData.channelName + '</b>');
 			InkElement.setHTML(Ink.i('ManagePatternConfirmChannelCode'),'Channel code: <b style="color:red">' + formData.channelCode + '</b>,   Channel digit: <b style="color:red">' + formData.channelDigit + '</b>');
 			InkElement.setHTML(Ink.i('ManagePatternConfirmPinDigit'),'Pin digit: <b style="color:red">' + formData.pinDigit + '</b>');
-			if (typeof modalManagePattern == "undefined") {modalManagePattern = new Modal('#formManagePatternConfirm');}
+
+			modalManagePattern = new Modal('#formManagePatternConfirm');
 			modalManagePattern.open(); 
         }
 	});
@@ -1728,7 +1777,8 @@ function managePatternEditSaveClick() {
 			InkElement.setHTML(Ink.i('ManagePatternConfirmChannel'),'Channel: <b style="color:red">' + formData.channelName + '</b>');
 			InkElement.setHTML(Ink.i('ManagePatternConfirmChannelCode'),'Channel code: <b style="color:red">' + formData.channelCode + '</b>,   Channel digit: <b style="color:red">' + formData.channelDigit + '</b>');
 			InkElement.setHTML(Ink.i('ManagePatternConfirmPinDigit'),'Pin digit: <b style="color:red">' + formData.pinDigit + '</b>');
-			if (typeof modalManagePattern == "undefined") {modalManagePattern = new Modal('#formManagePatternConfirm');}
+
+			modalManagePattern = new Modal('#formManagePatternConfirm');
 			modalManagePattern.open(); 
         }
 	});

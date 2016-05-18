@@ -66,7 +66,7 @@ public class Login extends HttpServlet {
 
 		Connection con = null;
 		Statement st1 = null;
-		String sql1 ="select * from usr where username = '" + userName + "' and password = '" + password + "'";
+		String sql1 ="select * from usr where username = '" + userName + "' and password = '" + password + "' and roleid <> 0";
 		ResultSet rs1 = null;
 
 		int userId = -1;

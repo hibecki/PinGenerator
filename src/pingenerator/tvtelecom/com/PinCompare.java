@@ -101,13 +101,14 @@ LOG.log(Level.WARNING, ex.getMessage(), ex);
 		if (!result.equals("failed")) {
 			URLConnection urlcon;
 			try {
-				String urlString = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+Utils.appPath+"PinCompareX?jobId="+jobId+"&userId="+userId;
+				//String urlString = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+Utils.appPath+"PinCompareX?jobId="+jobId+"&userId="+userId;
+				String urlString = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+Utils.appPath+"PinCompare3X?jobId="+jobId+"&userId="+userId;
 LOG.log(Level.INFO,"{0}-{1}",new Object[]{"urlString",urlString});	
 				URL url = new URL(urlString);
 				urlcon = url.openConnection();
 				urlcon.setConnectTimeout(100);
 				urlcon.setReadTimeout(100);
-LOG.log(Level.INFO,"{0}-{1}",new Object[]{"call PinCompareX",urlcon.getDate()});
+LOG.log(Level.INFO,"{0}-{1}",new Object[]{"call PinCompare3X",urlcon.getDate()});
 			} catch (MalformedURLException e) { 
 				LOG.log(Level.SEVERE, e.getMessage(), e);
 				result = "failed";

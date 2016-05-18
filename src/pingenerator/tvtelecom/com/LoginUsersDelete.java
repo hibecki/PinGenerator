@@ -2,8 +2,6 @@ package pingenerator.tvtelecom.com;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -22,11 +20,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
-@WebServlet("/LoginUsersUpdate")
-public class LoginUsersUpdate extends HttpServlet {
+@WebServlet("/LoginUsersDelete")
+public class LoginUsersDelete extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        
-    public LoginUsersUpdate() {
+    public LoginUsersDelete() {
         super();
     }
 
@@ -34,9 +32,6 @@ public class LoginUsersUpdate extends HttpServlet {
         Logger LOG = Logger.getLogger(LoginUsersUpdate.class.getName());
         request.setCharacterEncoding(Utils.CharacterEncoding);
         String userID = request.getParameter("userId");
-        String name = request.getParameter("name");
-        String userName = request.getParameter("userName");
-        String password = request.getParameter("password");
         
 		HttpSession session = request.getSession(false);
 		String userId = ((Integer)session.getAttribute("userId")).toString();
@@ -44,29 +39,11 @@ public class LoginUsersUpdate extends HttpServlet {
 		Connection con = null;
 		Statement st = null;
 		ResultSet rs = null;
-		String sql = "update USR set _NAME _USERNAME _PASSWORD UPDATEDBY = "+userId+", UPDATEDDATE = CURRENT_TIMESTAMP where USERID = " + userID;
+		String sql = "update USR set ROLEID = 0, UPDATEDBY = "+userId+", UPDATEDDATE = CURRENT_TIMESTAMP where USERID = " + userID;
 		
 		String result="failed";
 
 		try {
-			if (!name.trim().isEmpty()) {sql = sql.replaceAll("_NAME", "name = '"+name+"',");} else {sql = sql.replaceAll("_NAME", "");}
-			if (!userName.trim().isEmpty()) {sql = sql.replaceAll("_USERNAME", "username = '"+userName.trim().toUpperCase()+"',");} else {sql = sql.replaceAll("_USERNAME", "");}
-			if (!password.trim().isEmpty()) {
-				MessageDigest md;
-				
-				md = MessageDigest.getInstance("MD5");
-				md.update(password.trim().getBytes());
-				byte byteData[] = md.digest();
-
-				StringBuffer sb = new StringBuffer();
-				for (int i = 0; i < byteData.length; i++) {
-				 sb.append(Integer.toString((byteData[i] & 0xff) + 0x100, 16).substring(1));
-				}
-				password = sb.toString();
-
-				sql = sql.replaceAll("_PASSWORD", "password = '"+password+"',");
-			} else {sql = sql.replaceAll("_PASSWORD", "");}
-			
 			Context ctx = new InitialContext();
 			DataSource ds = (DataSource)ctx.lookup("java:comp/env/jdbc/PinGen");
 
@@ -75,8 +52,6 @@ public class LoginUsersUpdate extends HttpServlet {
 LOG.log(Level.INFO,"sql:{0}",new Object[]{sql});
 			st.executeUpdate(sql);
 			result = "succeed";
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
 		} catch(NamingException | SQLException ex) {
 LOG.log(Level.SEVERE, ex.getMessage(), ex);
 			result = "failed";
