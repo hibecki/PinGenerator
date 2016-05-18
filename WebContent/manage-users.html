@@ -25,7 +25,7 @@
 <div class="control-group required">
 	<label for="name">Name:</label>
 	<div class="control">
-	    <input id="name" name="name" class="ink-fv-required" style="width:15em;" type="text" placeholder="Name" maxlength="200" >
+	    <input id="name" name="name" class="ink-fv-required" style="width:15em;" type="text" placeholder="Name" maxlength="80" >
 	</div>
 </div>
 <div class="control-group required">
@@ -34,7 +34,7 @@
 	    <input id="userName" name="userName" class="ink-fv-required" style="width:15em;" type="text" placeholder="Username" maxlength="40" >
 	</div>
 </div>
-<div class="control-group required">
+<div id="passwordControl" class="control-group required">
 	<label for="password">Password:</label>
 	<div class="control">
 	    <input id="password" name="password" class="ink-fv-required" style="width:15em;" type="text" placeholder="Password" maxlength="40" >
@@ -43,8 +43,8 @@
 
 <br/>
 
-	<input id="buttonUpdate" type="button" value="&nbsp;&nbsp;&nbsp;Add new&nbsp;&nbsp;&nbsp;" class="ink-button green" onclick="manageUsersEditAddClick()">
-	<input id="buttonCancel" type="button" value="Cancel" class="ink-button red" onclick="manageUsersEditGoBack()">
+	<input id="buttonUpdate" type="button" value="&nbsp;&nbsp;&nbsp;Add new&nbsp;&nbsp;&nbsp;" class="ink-button green">
+	<input id="buttonCancel" type="button" value="Cancel" class="ink-button red" onclick="manageUsersGoBack()">
 </form><br/>
         </li>
     </ul>

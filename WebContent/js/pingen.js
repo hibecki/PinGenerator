@@ -12,6 +12,23 @@ function addSep(nStr) {
     }
     return x1 + x2;
 }
+function hasClass(ele,cls) {
+    return ele.className.match(new RegExp('(\\s|^)'+cls+'(\\s|$)'));
+}
+function removeClass(ele,cls) {
+    if (hasClass(ele,cls)) {
+        var reg = new RegExp('(\\s|^)'+cls+'(\\s|$)');
+        ele.className=ele.className.replace(reg,' ');
+    }
+}
+function addClass(ele,cls) {
+    if (!hasClass(ele,cls)) {
+    	ele.className = ele.className + ' ' + cls;
+    }
+}
+function removeAllClasses(ele) {
+	ele.className = '';
+}
 function isNumber(e) {
     var regex = new RegExp("^[0-9]+$");
     var str = String.fromCharCode(!e.charCode ? e.which : e.charCode);
@@ -1431,25 +1448,33 @@ function pinHistoryButtonSearchClick() {
 }
 
 function manageUsersButtonPlusClick() {
-	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Carousel_1','Ink.UI.ProgressBar_1','Ink.Dom.Event_1'], function(Ajax,FormSerialize,InkElement,Carousel,ProgressBar,InkEvent) {
+	Ink.requireModules(['Ink.Dom.Element_1','Ink.UI.Carousel_1','Ink.Dom.Event_1','Ink.UI.FormValidator_1'], function(InkElement,Carousel,InkEvent,FormValidator) {
 		if (typeof crs == "undefined") {crs = new Carousel('#manageUsersCarousel');}
 		crs.nextPage();
 
 		InkElement.setHTML(Ink.i('confirmMode'),'add');
+		InkElement.setHTML(Ink.i('ManageUsersConfirmMSG'),'Do you really want to add new pattern?');
 		Ink.i('buttonConfirm').className += " green";
-		Ink.i('buttonConfirm').innerHTML = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Yes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-		Ink.i('ManagePatternConfirmMSG').innerHTML = "Do you really want to add new pattern?";
+		InkElement.setHTML(Ink.i('buttonConfirm'),'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Yes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
 		
 		Ink.i('buttonUpdate').value = "   Add new   ";
-		InkEvent.on(Ink.i('buttonUpdate'), 'click', manageUsersEditAddClick);
-		InkElement.setHTML(Ink.i('managePatternEditHead'),'Add new user');
-		Ink.i('channelName').value = '';
-		Ink.i('channelCode').value = '';
-		Ink.i('channelDigit').value = '';
-		Ink.i('pinDigit').value = '';
+		InkElement.setHTML(Ink.i('manageUsersEditHead'),'Add new user');
+		
+		InkEvent.off(Ink.i('buttonUpdate'), 'click', manageUsersEditSaveClick);
+		InkEvent.on(Ink.i('buttonUpdate'), 'click', manageUsersAddClick);
+		
+		addClass(Ink.i('passwordControl'),'required');addClass(Ink.i('password'),'ink-fv-required');
+		
+		Ink.i('name').value = '.';
+		Ink.i('userName').value = '.';
+		Ink.i('password').value = '.';
+		FormValidator.validate(Ink.i('formManageUsers'));
+		Ink.i('name').value = '';
+		Ink.i('userName').value = '';
+		Ink.i('password').value = '';
 	});
 }
-function manageUsersEditAddClick() {
+function manageUsersAddClick() {
 	Ink.requireModules(['Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Modal_1','Ink.UI.FormValidator_1'], function(FormSerialize,InkElement,Modal,FormValidator) {
 	    var form = Ink.i('formManageUsers');
         if (FormValidator.validate(form)) {
@@ -1463,25 +1488,87 @@ function manageUsersEditAddClick() {
         }
 	});
 }
-function manageUsersEditGoBack() {
+function manageUsersEditClick(userID) {
+	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Carousel_1','Ink.Dom.Event_1','Ink.UI.FormValidator_1'], function(Ajax,FormSerialize,InkElement,Carousel,InkEvent,FormValidator) {
+		if (typeof crs == "undefined") {crs = new Carousel('#manageUsersCarousel');}
+		crs.nextPage();
+		
+		InkElement.setHTML(Ink.i('confirmMode'),'edit');
+		InkElement.setHTML(Ink.i('confirmUserId'),userID);
+		Ink.i('buttonConfirm').className += " green";
+		InkElement.setHTML(Ink.i('buttonConfirm'),'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Yes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
+		InkElement.setHTML(Ink.i('ManageUsersConfirmMSG'),'Do you really want to save user?');
+		
+		Ink.i('buttonUpdate').value = '      Save      ';
+		InkElement.setHTML(Ink.i('manageUsersEditHead'),'Edit users');
+		
+		InkEvent.off(Ink.i('buttonUpdate'), 'click', manageUsersAddClick);
+		InkEvent.on(Ink.i('buttonUpdate'), 'click', manageUsersEditSaveClick);
+		
+		removeClass(Ink.i('passwordControl'),'required');removeClass(Ink.i('password'),'ink-fv-required');
+		
+		Ink.i('name').value = '.';
+		Ink.i('userName').value = '.';
+		Ink.i('password').value = '.';
+		FormValidator.validate(Ink.i('formManageUsers'));
+		Ink.i('name').value = '';
+		Ink.i('userName').value = '';
+		Ink.i('password').value = '';
+		
+		var uri = window.url_home + '/LoginUserGetById?userID='+userID;
+	    new Ajax(uri, {
+	        method: 'GET',
+	        onSuccess: function(obj) {
+	            if(obj && obj.responseJSON) {
+	            	var result = obj.responseJSON['result'];
+	            	var USERID= obj.responseJSON['USERID'];
+	            	var NAME = obj.responseJSON['NAME'];
+	            	var USERNAME = obj.responseJSON['USERNAME'];
+					if(result==="succeed"){
+						Ink.i('userId').value = USERID;
+						Ink.i('name').value = NAME;
+						Ink.i('userName').value = USERNAME;
+					}
+				}
+            }, 
+            onFailure: function() {result="failed on network!";
+Ink.log("result: " + result);
+            }
+	    });
+	});
+}
+function manageUsersEditSaveClick() {
+	Ink.requireModules(['Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Modal_1','Ink.UI.FormValidator_1'], function(FormSerialize,InkElement,Modal,FormValidator) {
+		var form = Ink.i('formManageUsers');
+        if (FormValidator.validate(form)) {
+            var formData = FormSerialize.serialize(form);
+
+			InkElement.setHTML(Ink.i('ManageUsersConfirmName'),'Name: <b style="color:red">' + formData.name + '</b>');
+			InkElement.setHTML(Ink.i('ManageUsersConfirmUsername'),'Username: <b style="color:red">' + formData.userName + '</b>');
+
+			if (typeof modalManageUsers == "undefined") {modalManageUsers = new Modal('#formManageUsersConfirm');}
+			modalManageUsers.open(); 
+        }
+	});
+}
+function manageUsersGoBack() {
 	Ink.requireModules(['Ink.UI.Carousel_1'], function(Carousel) {
 		if (typeof crs == "undefined") {crs = new Carousel('#manageUsersCarousel');}
 		crs.setPage(1);crs.previousPage();
 	});
 }
-//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 function manageUsersConfirmClick() {
 	Ink.requireModules(['Ink.Net.Ajax_1', 'Ink.Dom.FormSerialize_1','Ink.Dom.Element_1','Ink.UI.Modal_1','Ink.UI.FormValidator_1'], function(Ajax,FormSerialize,InkElement,Modal,FormValidator) {
 		var confirmMode = Ink.i('confirmMode').innerHTML;
 		var uri = '';
 		if (confirmMode != 'delete') {
-			var form = Ink.i('formUsersPattern');
+			var form = Ink.i('formManageUsers'); //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 	        var formData = FormSerialize.serialize(form);
-	        Ink.i('channelName').disabled = true;
+	        //Ink.i('channelName').disabled = true;
 	        if (confirmMode != 'edit') {
-	        	uri = window.url_home + '/PatternAdd';
+	        	uri = window.url_home + '/LoginUsersAdd';
 	        } else {
-	        	uri = window.url_home + '/PatternUpdate';
+	        	uri = window.url_home + '/LoginUsersUpdate';
 	        }
 		    new Ajax(uri, {
 		        method: 'POST',
@@ -1491,7 +1578,7 @@ function manageUsersConfirmClick() {
 		            	var result = obj.responseJSON['result'];
 	Ink.log("result: " + result);
 						if(result==="succeed"){
-							menuManagePattern();
+							menuManageUsers();
 						}
 		            }
 		        }, 
@@ -1500,7 +1587,7 @@ function manageUsersConfirmClick() {
 		        }
 		    });
 		} else {
-			uri = window.url_home + '/PatternDelete?patternId=' + InkElement.textContent('confirmPatternId');
+			uri = window.url_home + '/LoginUsersDelete?userId=' + InkElement.textContent('confirmPatternId');
 		    new Ajax(uri, {
 		        method: 'GET',
 		        onSuccess: function(obj) {
@@ -1508,7 +1595,7 @@ function manageUsersConfirmClick() {
 		            	var result = obj.responseJSON['result'];
 	Ink.log("result: " + result);
 						if(result==="succeed"){
-							menuManagePattern();
+							menuManageUsers();
 						}
 		            }
 		        }, 

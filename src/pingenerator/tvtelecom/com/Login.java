@@ -35,7 +35,7 @@ public class Login extends HttpServlet {
         request.setCharacterEncoding(Utils.CharacterEncoding);
         String userName = request.getParameter("userName").trim().toUpperCase();
         String password = request.getParameter("password").trim();
-//LOG.log(Level.INFO,"userName:{0} password:{1}",new Object[]{userName,password});
+//LOG.log(Level.INFO,"Login userName:{0} password:{1}",new Object[]{userName,password});
 
 		MessageDigest md;
 		try {

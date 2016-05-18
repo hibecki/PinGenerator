@@ -19,42 +19,41 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
-@WebServlet("/LoginUsersTable")
-public class LoginUsersTable extends HttpServlet {
+@WebServlet("/LoginUserGetById")
+public class LoginUserGetById extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
-    public LoginUsersTable() {
+    public LoginUserGetById() {
         super();
     }
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        Logger LOG = Logger.getLogger(LoginUsersTable.class.getName());
+        Logger LOG = Logger.getLogger(LoginUserGetById.class.getName());
         request.setCharacterEncoding(Utils.CharacterEncoding);    
+        String userID = request.getParameter("userID");
         
 		Connection con = null;
 		Statement st1 = null;
-		String sql1 ="select * from usr order by username";
+		String sql1 ="select * from usr where userid = " + userID;
 		ResultSet rs1 = null;
 		
 		String result="failed";
+		int USERID = 0;
+		String NAME = null;
+		String USERNAME = null;
+		String PASSWORD = null;
 		
-		int USERID;
-		String USERNAME;
-		String NAME;
-		
-		String selectString = "";
 		try {
 			Context ctx = new InitialContext();
 			DataSource ds = (DataSource)ctx.lookup("java:comp/env/jdbc/PinGen");
 			con = ds.getConnection();
 			st1 = con.createStatement();
 			rs1 = st1.executeQuery(sql1);
-			while (rs1.next()) {
+			if (rs1.next()) {
 				USERID = rs1.getInt("USERID");
-				USERNAME = rs1.getString("USERNAME");
 				NAME = rs1.getString("NAME");
-				selectString += "<tr><td class='align-left'>"+USERNAME+"</td><td class='align-left'>"+NAME+"</td>";
-				selectString += "<td class='align-center' onclick='manageUsersEditClick(\""+USERID+"\");'><i class='fa fa-pencil-square-o'></i> Edit</td><td class='align-center' onclick='manageUsersDeleteClick(\""+USERID+"\");'><i class='fa fa-trash'></i> Delete</td></tr>";
+				USERNAME = rs1.getString("USERNAME");
+				PASSWORD = rs1.getString("PASSWORD");
 			}
 			result = "succeed";
 		} catch(NamingException | SQLException ex) {
@@ -68,17 +67,11 @@ public class LoginUsersTable extends HttpServlet {
             	LOG.log(Level.WARNING, ex.getMessage(), ex);
             }
 		}
-/*
+
 		response.setContentType("application/json");
 		response.setCharacterEncoding(Utils.CharacterEncoding);
 		PrintWriter out = response.getWriter();
-		out.print("{\"result\":\""+result+"\",\"selectString\":"+selectString+"}");
-		out.flush();
-*/		
-LOG.log(Level.INFO,"{0} {1}",new Object[]{"PatternTable: ",result});
-		response.setCharacterEncoding(Utils.CharacterEncoding);
-		PrintWriter out = response.getWriter();
-		out.print(selectString);
+		out.print("{\"result\":\""+result+"\",\"USERID\":"+USERID+",\"NAME\":\""+NAME+"\",\"USERNAME\":\""+USERNAME+"\",\"PASSWORD\":\""+PASSWORD+"\"}");
 		out.flush();
 	}
 
