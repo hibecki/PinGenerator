@@ -993,22 +993,23 @@ function comparePinButtonSubmitClick() {
 }
 function comparePinUpdateProgress(jobId,probar) {
 	Ink.requireModules(['Ink.Net.Ajax_1','Ink.Dom.Element_1','Ink.UI.ProgressBar_1'], function(Ajax,InkElement,ProgressBar) {
-	    var uri = window.url_home + '/PinCompare3Count?jobId=' + jobId;
+	    var uri = window.url_home + '/PinCompareCount?jobId=' + jobId;
 	    new Ajax(uri, {
 	        method: 'GET',
 	        onSuccess: function(obj) {
 	            if(obj && obj.responseJSON) {
-	            	var result = obj.responseJSON['result'];var c = obj.responseJSON['count'];var amount = obj.responseJSON['amount'];
+	            	var result = obj.responseJSON['result'];var c = obj.responseJSON['count']; //var amount = obj.responseJSON['amount'];
 	Ink.log("result: " + result);
 					if(result==="succeed"){
 						InkElement.setHTML(Ink.i('pinCompareAction'),'Comparing..');
 						InkElement.setHTML(Ink.i('pinCompareProgressBarCaption'),'<i class="fa fa-cog fa-spin"></i>&nbsp;&nbsp;Comparing...');
-						probar.setValue(Math.ceil(c/amount*100));
-						if ((c < amount) && (document.getElementById('pinCompareAction'))) {
+						probar.setValue(Math.ceil(c)); //probar.setValue(Math.ceil(c/amount*100));
+						if ((c < 100) && (document.getElementById('pinCompareAction'))) {
 							setTimeout(function(){comparePinUpdateProgress(jobId,probar);},3000);
 						} else {
 							InkElement.setHTML(Ink.i('pinCompareProgressBarCaption'),'<div style="color:white"><i class="fa fa-cog"></i>&nbsp;&nbsp;Succeed</div>');
-							InkElement.setHTML(Ink.i('pinCompareAction'),'Download duplicated PIN as CSV file: click <a href="'+window.url_home + '/PinCompare3CSV?jobId='+jobId+'">here</a>');
+							//InkElement.setHTML(Ink.i('pinCompareAction'),'Download duplicated PIN as CSV file: click <a href="'+window.url_home + '/PinCompare3CSV?jobId='+jobId+'">here</a>');
+							InkElement.setHTML(Ink.i('pinCompareAction'),'Download duplicated PIN as CSV file: click <a href="'+window.url_home + '/PinHistDownloadCSV?status=D&jobId='+jobId+'">here</a>');
 						}
 					
 					}

@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -34,7 +37,7 @@ public class PinCompareX extends HttpServlet {
         Logger LOG = Logger.getLogger(PinCompareX.class.getName());
         request.setCharacterEncoding(Utils.CharacterEncoding);    
         String jobId = request.getParameter("jobId");
-        //String userId = request.getParameter("userId");
+        String userId = request.getParameter("userId");
 		
 LOG.log(Level.INFO,"{0} {1}",new Object[]{"PinCompareX-jobId: ",jobId});
         
@@ -162,6 +165,25 @@ LOG.log(Level.INFO,"{0}-{1}",new Object[]{"PinCompareX","Done!"});
             }
 		}
 
+		if (!result.equals("failed")) {
+			URLConnection urlcon;
+			try {
+				String urlString = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+Utils.appPath+"PinLoad?jobId="+jobId+"&userId="+userId;
+LOG.log(Level.INFO,"{0}-{1}",new Object[]{"urlString",urlString});	
+				URL url = new URL(urlString);
+				urlcon = url.openConnection();
+				urlcon.setConnectTimeout(100);
+				urlcon.setReadTimeout(100);
+LOG.log(Level.INFO,"{0}-{1}",new Object[]{"call PinLoad",urlcon.getDate()});
+			} catch (MalformedURLException e) { 
+				LOG.log(Level.SEVERE, e.getMessage(), e);
+				result = "failed";
+			} catch (IOException e) {
+				LOG.log(Level.SEVERE, e.getMessage(), e);
+				result = "failed";
+			}
+		}
+		
 		response.setContentType("application/json");
 		response.setCharacterEncoding(Utils.CharacterEncoding);
 		PrintWriter out = response.getWriter();
