@@ -54,8 +54,12 @@ public class LoginUsersTable extends HttpServlet {
 				USERNAME = rs1.getString("USERNAME");
 				NAME = rs1.getString("NAME");
 				selectString += "<tr><td class='align-left'>"+USERNAME+"</td><td class='align-left'>"+NAME+"</td>";
-				selectString += "<td class='align-center' onclick='manageUsersEditClick(\""+USERID+"\");'><i class='fa fa-pencil-square-o'></i> Edit</td><td class='align-center' onclick='manageUsersDeleteClick(\""+USERID+"\");'><i class='fa fa-trash'></i> Delete</td></tr>";
-			}
+				if (USERID != 1) {
+					selectString += "<td class='align-center' onclick='manageUsersEditClick(\""+USERID+"\");'><i class='fa fa-pencil-square-o'></i> Edit</td><td class='align-center' onclick='manageUsersDeleteClick(\""+USERID+"\");'><i class='fa fa-trash'></i> Delete</td></tr>";
+				} else {
+					selectString += "<td class='align-center'></td><td class='align-center'></td></tr>";
+				}
+							}
 			result = "succeed";
 		} catch(NamingException | SQLException ex) {
 			LOG.log(Level.SEVERE, ex.getMessage(), ex);
