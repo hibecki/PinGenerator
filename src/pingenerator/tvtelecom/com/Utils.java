@@ -1,16 +1,5 @@
 package pingenerator.tvtelecom.com;
 
-/**
-*
-* @author Thanwa Ananthaseth
-* @version 1.0 - Initial
-* @since 02-Feb-2016
-* *
-* @author Thanwa Ananthaseth
-* @version 1.1 - Add more config path
-* @since 11-May-2016
-*/
-
 public class Utils {
     public static String CharacterEncoding = "UTF-8";
     public static String DbPath = System.getProperty("catalina.base") + "/PinGen";
